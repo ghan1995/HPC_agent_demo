@@ -29,7 +29,7 @@ import {
   ThumbsUp,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Composer } from "./composer";
 import { createCurrentRoundTaskPlan, diagnosisTrace, submissionTaskPlan, submissionTrace } from "./data";
@@ -100,7 +100,9 @@ export function ConversationView({
   const [approval, setApproval] = useState<ApprovalState>("requested");
   const [feedback, setFeedback] = useState<FeedbackValue>(null);
   const [copied, setCopied] = useState(false);
-  const [reanalyzing, setReanalyzing] = useState(false);
+  const [runPhase, setRunPhase] = useState<number | null>(null);
+  const runTimers = useRef<number[]>([]);
+  const reanalyzing = runPhase !== null;
 
   const taskPlan = useMemo(() => submitted ? createCurrentRoundTaskPlan(submitted) : planForApproval(approval), [approval, submitted]);
   const approvalPart = approval === "requested"
@@ -115,10 +117,21 @@ export function ConversationView({
     window.setTimeout(() => setCopied(false), 1600);
   }
 
-  function reanalyze() {
-    setReanalyzing(true);
-    window.setTimeout(() => setReanalyzing(false), 1800);
+  function clearRunTimers() {
+    runTimers.current.forEach((timer) => window.clearTimeout(timer));
+    runTimers.current = [];
   }
+
+  function reanalyze() {
+    clearRunTimers();
+    setRunPhase(0);
+    [1, 2, 3, 4].forEach((phase, index) => {
+      runTimers.current.push(window.setTimeout(() => setRunPhase(phase), (index + 1) * 850));
+    });
+    runTimers.current.push(window.setTimeout(() => setRunPhase(null), 4250));
+  }
+
+  useEffect(() => () => clearRunTimers(), []);
 
   return (
     <section className="agent-main conversation-mode">
@@ -148,7 +161,7 @@ export function ConversationView({
             <Message className="max-w-full" from="assistant">
               <div className="assistant-identity"><span><Sparkles /></span><strong>HPC Agent</strong></div>
               <MessageContent className="w-full overflow-visible">
-                <RunTrace active={reanalyzing} trace={diagnosisTrace} />
+                <RunTrace runPhase={runPhase} trace={diagnosisTrace} />
                 <div className="assistant-copy">
                   <p>诊断完成。作业因<strong>内存使用超过申请值</strong>被系统终止，应用本身没有发现明显代码异常。</p>
                   <section className="diagnosis-summary">

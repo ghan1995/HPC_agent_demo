@@ -37,7 +37,7 @@
 
 - 使用 `Conversation` 管理滚动和回到底部。
 - 使用 `Message`、`MessageContent` 和 `MessageActions` 展示消息、复制和反馈。
-- 使用统一工作时间线展示判断摘要、阶段、工具调用、子 Agent 和结果。
+- 工作过程与 Subagent 协作作为同一次运行的两个并列视图，共享状态并保持步骤与执行者之间的轻量关联。
 - 工具节点展示名称、状态、输入、输出和错误。
 - 子 Agent 可逐个展开，展示职责、状态、耗时、真实输入输出和工具；模型、指令摘要和可用工具位于二级配置。
 - 已完成过程默认收起，运行中或等待确认过程默认展开。
@@ -69,10 +69,10 @@
 
 统一类型位于 `src/features/hpc-agent/types.ts`：
 
-- `RunEvent`：摘要、工具、子 Agent 和结果等运行事件。
+- `RunEvent`：阶段摘要、工具、参考资料和关联 Subagent ID 等运行事件。
 - `ToolRun`：工具名称、状态、输入、输出和错误。
 - `SubAgentRun`：职责、状态、耗时、配置和真实输入输出。
-- `RunTrace`：一次完整的可审计运行过程。
+- `RunTrace`：一次完整的可审计运行，独立承载工作事件、Subagent 和 Demo 运行帧。
 - `TaskPlan`：当前任务及步骤。
 - `ApprovalState`：等待、批准和拒绝。
 - `SessionGroup` 与 `SessionItem`：Session 分组及单项数据。

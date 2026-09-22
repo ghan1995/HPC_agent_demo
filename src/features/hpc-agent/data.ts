@@ -210,7 +210,8 @@ export const diagnosisTrace: RunTrace = {
   title: "工作过程",
   summary: "已完成 · 6 项活动",
   duration: "30s",
-  defaultOpen: false,
+  defaultWorkOpen: false,
+  defaultAgentsOpen: false,
   events: [
     {
       id: "understand",
@@ -250,7 +251,7 @@ export const diagnosisTrace: RunTrace = {
       summary: "3 个子 Agent 完成调度、日志与资源分析。",
       icon: BrainCircuit,
       status: "complete",
-      agents: diagnosisAgents,
+      agentIds: diagnosisAgents.map((agent) => agent.id),
     },
     {
       id: "logs",
@@ -267,13 +268,47 @@ export const diagnosisTrace: RunTrace = {
       status: "complete",
     },
   ],
+  agents: diagnosisAgents,
+  simulation: [
+    {
+      summary: "正在理解任务并准备证据",
+      duration: "运行中",
+      eventStatuses: { understand: "active", guidance: "pending", scheduler: "pending", delegation: "pending", logs: "pending", conclusion: "pending" },
+      agentStatuses: { "scheduler-agent": "待启动", "log-agent": "待启动", "resource-agent": "待启动" },
+    },
+    {
+      summary: "3 个子 Agent 正在并行分析",
+      duration: "运行中",
+      eventStatuses: { understand: "complete", guidance: "complete", scheduler: "active", delegation: "active", logs: "pending", conclusion: "pending" },
+      agentStatuses: { "scheduler-agent": "运行中", "log-agent": "运行中", "resource-agent": "运行中" },
+    },
+    {
+      summary: "2 个已完成，1 个仍在分析",
+      duration: "运行中",
+      eventStatuses: { understand: "complete", guidance: "complete", scheduler: "complete", delegation: "active", logs: "active", conclusion: "pending" },
+      agentStatuses: { "scheduler-agent": "完成", "log-agent": "完成", "resource-agent": "运行中" },
+    },
+    {
+      summary: "专业分析已完成，正在汇总结论",
+      duration: "运行中",
+      eventStatuses: { understand: "complete", guidance: "complete", scheduler: "complete", delegation: "complete", logs: "complete", conclusion: "active" },
+      agentStatuses: { "scheduler-agent": "完成", "log-agent": "完成", "resource-agent": "完成" },
+    },
+    {
+      summary: "已完成 · 6 项活动",
+      duration: "30s",
+      eventStatuses: { understand: "complete", guidance: "complete", scheduler: "complete", delegation: "complete", logs: "complete", conclusion: "complete" },
+      agentStatuses: { "scheduler-agent": "完成", "log-agent": "完成", "resource-agent": "完成" },
+    },
+  ],
 };
 
 export const submissionTrace: RunTrace = {
   title: "工作过程",
   summary: "等待确认 · 4 项活动",
   duration: "8s",
-  defaultOpen: true,
+  defaultWorkOpen: true,
+  defaultAgentsOpen: true,
   events: [
     {
       id: "submit-understand",
@@ -292,11 +327,11 @@ export const submissionTrace: RunTrace = {
     },
     {
       id: "submit-agents",
-      title: "子 Agent 准备并校验配置",
+      title: "准备并校验提交配置",
       summary: "2 个已完成，1 个等待用户确认。",
       icon: Server,
       status: "active",
-      agents: submissionAgents,
+      agentIds: submissionAgents.map((agent) => agent.id),
       tools: [
         {
           id: "read-config",
@@ -316,4 +351,5 @@ export const submissionTrace: RunTrace = {
       status: "complete",
     },
   ],
+  agents: submissionAgents,
 };
