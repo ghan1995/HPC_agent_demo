@@ -131,18 +131,28 @@ export function SessionSidebar({
               </h2>
               <div className="flex flex-col gap-0.5">
                 {group.items.map((item) => (
-                  <div className={cn("session-row-wrap", selectedId === item.id && "is-selected")} key={item.id}>
+                  <div
+                    className={cn("session-row-wrap", selectedId === item.id && "is-selected")}
+                    key={item.id}
+                    onKeyDownCapture={(event) => {
+                      if ((event.key === "Enter" || event.key === " ") && (event.target as HTMLElement).closest(".session-row")) onSelect(item.id);
+                    }}
+                    onPointerDownCapture={(event) => {
+                      if (event.button === 0 && (event.target as HTMLElement).closest(".session-row")) onSelect(item.id);
+                    }}
+                  >
                     <HoverCard>
-                      <HoverCardTrigger render={<span className="contents" />}>
-                        <button
-                          aria-label={`${item.status}，${item.title}`}
-                          className="session-row"
-                          onClick={() => onSelect(item.id)}
-                          type="button"
-                        >
-                          <span className={cn("session-status", toneClass[item.tone])} title={item.status}><i aria-hidden="true" /><span className="sr-only">{item.status}</span></span>
-                          <span className="truncate">{item.title}</span>
-                        </button>
+                      <HoverCardTrigger
+                        render={
+                          <button
+                            aria-label={`${item.status}，${item.title}`}
+                            className="session-row"
+                            type="button"
+                          />
+                        }
+                      >
+                        <span className={cn("session-status", toneClass[item.tone])} title={item.status}><i aria-hidden="true" /><span className="sr-only">{item.status}</span></span>
+                        <span className="truncate">{item.title}</span>
                       </HoverCardTrigger>
                       <HoverCardContent align="start" className="w-72" side="right" sideOffset={10}>
                         <strong className="block truncate text-sm font-medium">{item.title}</strong>

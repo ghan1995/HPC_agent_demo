@@ -5,6 +5,7 @@ export type ApprovalState = "requested" | "approved" | "rejected";
 export type FeedbackValue = "up" | "down" | null;
 export type TaskStatus = "completed" | "active" | "waiting" | "queued";
 export type RunStatus = "complete" | "active" | "pending" | "error";
+export type SubAgentStatus = "完成" | "运行中" | "待启动" | "等待" | "失败";
 
 export type ToolRun = {
   id: string;
@@ -27,7 +28,7 @@ export type SubAgentRun = {
   id: string;
   name: string;
   role: string;
-  status: "完成" | "运行中" | "等待" | "失败";
+  status: SubAgentStatus;
   duration: string;
   input: Record<string, unknown>;
   output: Record<string, unknown> | string;
@@ -43,16 +44,26 @@ export type RunEvent = {
   icon: LucideIcon;
   status: RunStatus;
   tools?: ToolRun[];
-  agents?: SubAgentRun[];
+  agentIds?: string[];
   references?: string[];
+};
+
+export type RunFrame = {
+  summary: string;
+  duration: string;
+  eventStatuses: Partial<Record<string, RunStatus>>;
+  agentStatuses: Partial<Record<string, SubAgentStatus>>;
 };
 
 export type RunTrace = {
   title: string;
   summary: string;
   duration: string;
-  defaultOpen: boolean;
+  defaultWorkOpen: boolean;
+  defaultAgentsOpen: boolean;
   events: RunEvent[];
+  agents: SubAgentRun[];
+  simulation?: RunFrame[];
 };
 
 export type TaskPlan = {
