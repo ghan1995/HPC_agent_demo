@@ -6,9 +6,11 @@
 
 ## Demo 体验入口
 
-直接点击进入：**[HPC Agent 在线 Demo](https://hpc-agent-demo.gaohan199581.chatgpt.site)**
+直接点击进入：**[HPC Agent 在线 Demo（AtomGit）](https://ai.gitcode.com/weixin_44520172/hpcdemo)**
 
 无需安装环境或执行命令。Demo 展示的业务数据和执行结果均为本地模拟，不会连接或操作真实 HPC 系统。
+
+备用入口：[HPC Agent 在线 Demo（外部托管）](https://hpc-agent-demo.gaohan199581.chatgpt.site)
 
 <details>
 <summary>本地备用预览方式</summary>
