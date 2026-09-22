@@ -10,6 +10,8 @@
 
 无需安装环境或执行命令。Demo 展示的业务数据和执行结果均为本地模拟，不会连接或操作真实 HPC 系统。
 
+备用入口：[GitHub Pages Demo](https://ghan1995.github.io/HPC_agent_demo/)
+
 <details>
 <summary>本地备用预览方式</summary>
 
