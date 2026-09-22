@@ -4,6 +4,18 @@
 
 当前已完成一轮可交互前端原型，包括 Session 项目分组、新对话首页、对话区、可审计工作过程、工具与子 Agent 详情、任务托盘、执行确认和右侧 Inspector。所有业务数据与执行结果仍为本地演示状态，未接入真实 HPC 后端。
 
+## Demo 体验入口
+
+仓库已包含构建完成的 `out/` 静态 Demo，无需安装 Node.js 或项目依赖。在仓库根目录执行：
+
+```bash
+python3 -m http.server 4173 -d out
+```
+
+然后在浏览器打开：**[http://localhost:4173](http://localhost:4173)**
+
+> 请通过上述地址体验，不要直接双击 `out/index.html`；静态资源需要由本地 HTTP 服务读取。
+
 ## 文档入口
 
 - [文档导航](docs/README.md)
@@ -27,7 +39,7 @@ pnpm lint
 pnpm build
 ```
 
-`pnpm build` 会将静态站点输出到 `out/`。可以使用任意静态文件服务器预览，例如：
+`pnpm build` 会刷新已纳入版本控制的 `out/` Demo 交付物。构建后可使用任意静态文件服务器预览，例如：
 
 ```bash
 python3 -m http.server 4173 -d out
