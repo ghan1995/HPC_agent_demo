@@ -207,10 +207,10 @@ const submissionAgents = [
 ];
 
 export const diagnosisTrace: RunTrace = {
-  title: "工作过程",
+  title: "思考过程",
   summary: "已完成 · 6 项活动",
   duration: "30s",
-  defaultWorkOpen: false,
+  defaultOpen: false,
   defaultAgentsOpen: false,
   events: [
     {
@@ -304,10 +304,10 @@ export const diagnosisTrace: RunTrace = {
 };
 
 export const submissionTrace: RunTrace = {
-  title: "工作过程",
+  title: "思考过程",
   summary: "等待确认 · 4 项活动",
   duration: "8s",
-  defaultWorkOpen: true,
+  defaultOpen: true,
   defaultAgentsOpen: true,
   events: [
     {
