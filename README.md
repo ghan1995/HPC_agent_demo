@@ -6,11 +6,11 @@
 
 ## Demo 体验入口
 
-直接点击进入：**[HPC Agent 在线 Demo](https://hpc-agent-demo.gaohan199581.chatgpt.site)**
+直接点击进入：**[HPC Agent 在线 Demo](https://ghan1995.github.io/HPC_agent_demo/)**
 
 无需安装环境或执行命令。Demo 展示的业务数据和执行结果均为本地模拟，不会连接或操作真实 HPC 系统。
 
-备用入口：[GitHub Pages Demo](https://ghan1995.github.io/HPC_agent_demo/)
+备用入口：[Sites Demo](https://hpc-agent-demo.gaohan199581.chatgpt.site)
 
 <details>
 <summary>本地备用预览方式</summary>
@@ -29,6 +29,7 @@ python3 -m http.server 4173 -d out
 
 - **[直接打开 Agent 对话流输出规范](https://ghan1995.github.io/HPC_agent_demo/docs/agent-conversation-output-spec.html)**
 - [Agent 对话流输出规范（仓库文件）](docs/agent-conversation-output-spec.html)
+- [下一步设计待办](docs/next-design-todos.md)
 - [文档导航](docs/README.md)
 - [当前阶段工作进展与实现约束](docs/current-stage.md)
 - [项目启动与前端技术基线](HPC智能体Demo_项目启动与前端技术基线.md)
