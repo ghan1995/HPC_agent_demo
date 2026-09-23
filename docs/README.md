@@ -9,6 +9,7 @@
 3. [项目启动与前端技术基线](../HPC智能体Demo_项目启动与前端技术基线.md)
 4. [Agent 协作设计指南](../HPC智能体Demo_Agent协作设计指南.md)
 5. [产品决策记录](../knowledge/decisions.md)
+6. [下一步设计待办](next-design-todos.md)
 
 ## 文档职责
 
@@ -19,6 +20,7 @@
 | `HPC智能体Demo_项目启动与前端技术基线.md` | 技术选型、运行方式、依赖和项目范围 | 框架、依赖或阶段边界变化时 |
 | `HPC智能体Demo_Agent协作设计指南.md` | 长期协作方式、HPC 语境、设计方法和安全原则 | 长期方法论变化时 |
 | `knowledge/decisions.md` | 已形成共识的产品和交互决策 | 新决策或原决策被修订时 |
+| `docs/next-design-todos.md` | 下一步需要展开的体验设计、状态和完成标准 | 新增设计待办或待办完成时 |
 
 ## 维护规则
 
