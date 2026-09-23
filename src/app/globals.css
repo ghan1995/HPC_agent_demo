@@ -696,31 +696,168 @@
 .assistant-copy p { margin: 0; }
 
 .run-trace {
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.run-trace__trigger {
+  display: flex;
+  width: 100%;
+  min-height: 36px;
+  align-items: center;
+  gap: 10px;
+  border-radius: 6px;
+  padding: 5px 2px;
+  text-align: left;
+  transition: background-color 150ms ease;
+}
+
+.run-trace__trigger:hover {
+  background: color-mix(in oklab, var(--muted) 55%, transparent);
+}
+
+.run-trace__trigger:focus-visible,
+.run-section__trigger:focus-visible,
+.run-event__trigger:focus-visible,
+.run-event__agents:focus-visible,
+.subagent-item__trigger:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.run-trace__status-icon {
+  display: flex;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-foreground);
+}
+
+.run-trace__status-icon svg { width: 14px; height: 14px; }
+.run-trace--running .run-trace__status-icon { color: var(--status-running); }
+.run-trace--waiting .run-trace__status-icon { color: var(--status-waiting); }
+.run-trace--error .run-trace__status-icon { color: var(--status-error); }
+
+.run-trace__heading {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: baseline;
+  gap: 9px;
+}
+
+.run-trace__heading strong {
+  flex: 0 0 auto;
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 620;
+  line-height: 1.4;
+}
+
+.run-trace__heading small {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.run-trace__chevron {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  color: var(--muted-foreground);
+  transition: transform 160ms ease;
+}
+
+.run-trace[data-open] > .run-trace__trigger .run-trace__chevron,
+.run-trace[data-state="open"] > .run-trace__trigger .run-trace__chevron {
+  transform: rotate(180deg);
+}
+
+.run-trace__content {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 2px;
+  gap: 14px;
+  overflow: hidden;
+  border-left: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
+  margin-left: 10px;
+  padding: 8px 0 7px 20px;
+  outline: none;
 }
 
-.run-section {
-  min-width: 0;
+.run-trace__narrative {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.65;
 }
+
+.run-trace__narrative p { margin: 0; }
+
+.run-process { min-width: 0; }
+
+.run-process__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0 2px 10px;
+}
+
+.run-process__header > svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--muted-foreground);
+}
+
+.run-process__header > span { min-width: 0; }
+
+.run-process__header strong {
+  display: block;
+  color: var(--foreground);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.run-process__header small {
+  display: block;
+  margin-top: 1px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.run-process__events {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding-left: 1px;
+}
+
+.run-section { min-width: 0; }
 
 .run-section--agents {
-  border: 1px solid color-mix(in oklab, var(--border) 82%, transparent);
-  border-radius: 9px;
-  background: color-mix(in oklab, var(--muted) 42%, var(--background));
-  padding: 3px 10px 5px;
+  border-top: 1px solid color-mix(in oklab, var(--border) 72%, transparent);
+  padding-top: 6px;
 }
 
 .run-section__trigger {
   display: flex;
   width: 100%;
-  min-height: 36px;
+  min-height: 34px;
   align-items: center;
   gap: 8px;
   border-radius: 6px;
-  padding: 5px 2px;
+  padding: 4px 2px;
   color: var(--muted-foreground);
   text-align: left;
   transition: color 150ms ease, background-color 150ms ease;
@@ -731,17 +868,9 @@
   color: var(--foreground);
 }
 
-.run-section__trigger:focus-visible,
-.run-event__trigger:focus-visible,
-.run-event__agents:focus-visible,
-.subagent-item__trigger:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
 .run-section__icon {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   flex: 0 0 auto;
 }
 
@@ -756,35 +885,19 @@
 .run-section__heading strong {
   flex: 0 0 auto;
   color: var(--foreground);
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.35;
-}
-
-.run-section--agents .run-section__heading strong {
-  color: var(--foreground);
   font-size: 13px;
   font-weight: 600;
+  line-height: 1.35;
 }
 
 .run-section__heading small {
   min-width: 0;
   overflow: hidden;
   color: var(--muted-foreground);
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.run-section--agents .run-section__heading small {
-  font-size: 11px;
-}
-
-.run-section--agents .run-section__icon {
-  width: 15px;
-  height: 15px;
-  color: var(--muted-foreground);
 }
 
 .run-section__chevron {
@@ -804,18 +917,11 @@
   outline: none;
 }
 
-.run-section__content--work {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 10px 0 12px 2px;
-}
-
 .run-section__content--agents {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 4px 0 3px 20px;
+  padding: 4px 0 1px 22px;
 }
 
 .run-event__trigger {
@@ -1001,14 +1107,26 @@
 .subagent-item__config { align-self: flex-start; margin-left: -8px; }
 
 @media (max-width: 640px) {
+  .run-trace__heading { display: block; }
+  .run-trace__heading small { display: block; margin-top: 1px; white-space: normal; }
+  .run-trace__content { margin-left: 8px; padding-right: 0; padding-left: 16px; }
   .run-section__heading { display: block; }
   .run-section__heading small { display: block; margin-top: 1px; }
-  .run-section--agents { padding-right: 8px; padding-left: 8px; }
   .run-section__content--agents { padding-left: 12px; }
   .subagent-item__trigger { grid-template-columns: 15px minmax(0, 1fr) auto 15px; }
   .subagent-item__duration { display: none; }
   .subagent-item__identity small { white-space: normal; }
   .subagent-item__content { padding-right: 18px; padding-left: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .run-trace,
+  .run-trace__chevron,
+  .run-section__chevron,
+  .run-event__chevron,
+  .subagent-item__chevron {
+    transition: none;
+  }
 }
 
 .status-badge {

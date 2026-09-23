@@ -6,18 +6,29 @@
 
 ## Demo 体验入口
 
-仓库已包含构建完成的 `out/` 静态 Demo，无需安装 Node.js 或项目依赖。在仓库根目录执行：
+直接点击进入：**[HPC Agent 在线 Demo](https://hpc-agent-demo.gaohan199581.chatgpt.site)**
+
+无需安装环境或执行命令。Demo 展示的业务数据和执行结果均为本地模拟，不会连接或操作真实 HPC 系统。
+
+备用入口：[GitHub Pages Demo](https://ghan1995.github.io/HPC_agent_demo/)
+
+<details>
+<summary>本地备用预览方式</summary>
+
+仓库同时保留了构建完成的 `out/` 静态 Demo。在仓库根目录执行：
 
 ```bash
 python3 -m http.server 4173 -d out
 ```
 
-然后在浏览器打开：**[http://localhost:4173](http://localhost:4173)**
+然后打开 [http://localhost:4173](http://localhost:4173)。
 
-> 请通过上述地址体验，不要直接双击 `out/index.html`；静态资源需要由本地 HTTP 服务读取。
+</details>
 
 ## 文档入口
 
+- **[直接打开 Agent 对话流输出规范](https://ghan1995.github.io/HPC_agent_demo/docs/agent-conversation-output-spec.html)**
+- [Agent 对话流输出规范（仓库文件）](docs/agent-conversation-output-spec.html)
 - [文档导航](docs/README.md)
 - [当前阶段工作进展与实现约束](docs/current-stage.md)
 - [项目启动与前端技术基线](HPC智能体Demo_项目启动与前端技术基线.md)

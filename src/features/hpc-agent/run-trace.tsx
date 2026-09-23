@@ -81,6 +81,62 @@ function SectionHeader({
   );
 }
 
+function WorkProcessSection({
+  agentMap,
+  events,
+  onAgentSelect,
+  summary,
+}: {
+  agentMap: Map<string, SubAgentRun>;
+  events: RunEvent[];
+  onAgentSelect: (agentId: string) => void;
+  summary: string;
+}) {
+  return (
+    <section className="run-process" aria-label="工作过程">
+      <div className="run-process__header">
+        <GitBranch aria-hidden="true" />
+        <span>
+          <strong>工作过程</strong>
+          <small>{summary}</small>
+        </span>
+      </div>
+      <div className="run-process__events">
+        {events.map((event) => (
+          <RunEventRow agentMap={agentMap} event={event} key={event.id} onAgentSelect={onAgentSelect} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function SubAgentSection({
+  agents,
+  highlightedAgent,
+  onOpenChange,
+  open,
+  summary,
+}: {
+  agents: SubAgentRun[];
+  highlightedAgent: string | null;
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
+  summary: string;
+}) {
+  if (!agents.length) return null;
+
+  return (
+    <Collapsible className="run-section run-section--agents" onOpenChange={onOpenChange} open={open}>
+      <SectionHeader icon={Users} summary={summary} title="Agent 协作" />
+      <CollapsibleContent className="run-section__content run-section__content--agents">
+        {agents.map((agent) => (
+          <AgentRun agent={agent} highlighted={agent.id === highlightedAgent} key={agent.id} />
+        ))}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
 function AgentRun({ agent, highlighted }: { agent: SubAgentRun; highlighted: boolean }) {
   const [open, setOpen] = useState(agent.status === "等待" || agent.status === "失败");
   const StatusIcon = agentStatusMeta[agent.status].icon;
@@ -241,24 +297,33 @@ export function RunTrace({
   const frame = active ? trace.simulation?.[runPhase] : undefined;
   const projected = useMemo(() => applyFrame(trace, frame), [frame, trace]);
   const agentMap = useMemo(() => new Map(projected.agents.map((agent) => [agent.id, agent])), [projected.agents]);
-  const [workOpen, setWorkOpen] = useState(trace.defaultWorkOpen);
+  const hasWaiting = projected.agents.some((agent) => agent.status === "等待");
+  const hasError = projected.agents.some((agent) => agent.status === "失败") || projected.events.some((event) => event.status === "error");
+  const processState = active ? "running" : hasError ? "error" : hasWaiting ? "waiting" : "complete";
+  const [processOpen, setProcessOpen] = useState(trace.defaultOpen);
   const [agentsOpen, setAgentsOpen] = useState(trace.defaultAgentsOpen);
   const [targetAgent, setTargetAgent] = useState<string | null>(null);
   const previousActive = useRef(active);
+  const processTouched = useRef(false);
   const agentsTouched = useRef(false);
 
   useEffect(() => {
     if (active && !previousActive.current) {
-      setWorkOpen(true);
+      setProcessOpen(true);
       setAgentsOpen(false);
       setTargetAgent(null);
+      processTouched.current = false;
       agentsTouched.current = false;
     }
+    if (!active && previousActive.current && !processTouched.current) {
+      setProcessOpen(processState !== "complete");
+    }
     previousActive.current = active;
-  }, [active]);
+  }, [active, processState]);
 
   useEffect(() => {
     const needsAttention = projected.agents.some((agent) => agent.status === "等待" || agent.status === "失败");
+    if (needsAttention && !processTouched.current) setProcessOpen(true);
     if (needsAttention && !agentsTouched.current) setAgentsOpen(true);
   }, [projected.agents]);
 
@@ -273,43 +338,75 @@ export function RunTrace({
   }, [agentsOpen, targetAgent]);
 
   function selectAgent(agentId: string) {
+    processTouched.current = true;
     agentsTouched.current = true;
     setTargetAgent(agentId);
+    setProcessOpen(true);
     setAgentsOpen(true);
   }
 
   const workSummary = frame?.summary ?? trace.summary;
   const agentSummary = summarizeAgents(projected.agents);
   const duration = frame?.duration ?? trace.duration;
+  const processMeta = {
+    complete: {
+      icon: CheckCircle2,
+      label: trace.title,
+      summary: `已思考 ${duration} · ${projected.events.length} 项活动${projected.agents.length ? ` · ${projected.agents.length} 个 Agent` : ""}`,
+    },
+    error: {
+      icon: XCircle,
+      label: "处理失败",
+      summary: `${workSummary} · ${agentSummary}`,
+    },
+    running: {
+      icon: LoaderCircle,
+      label: "思考中",
+      summary: `${workSummary} · ${duration}`,
+    },
+    waiting: {
+      icon: Clock3,
+      label: "等待确认",
+      summary: `${projected.events.length} 项活动 · ${agentSummary}`,
+    },
+  }[processState];
+  const ProcessIcon = processMeta.icon;
 
   return (
-    <div className="run-trace">
-      <Collapsible className="run-section run-section--work" onOpenChange={setWorkOpen} open={workOpen}>
-        <SectionHeader icon={GitBranch} summary={`${workSummary} · ${duration}`} title="工作过程" />
-        <CollapsibleContent className="run-section__content run-section__content--work">
-          {projected.events.map((event) => (
-            <RunEventRow agentMap={agentMap} event={event} key={event.id} onAgentSelect={selectAgent} />
-          ))}
-        </CollapsibleContent>
-      </Collapsible>
-
-      {projected.agents.length ? (
-        <Collapsible
-          className="run-section run-section--agents"
+    <Collapsible
+      className={cn("run-trace", `run-trace--${processState}`)}
+      onOpenChange={(open) => {
+        processTouched.current = true;
+        setProcessOpen(open);
+      }}
+      open={processOpen}
+    >
+      <CollapsibleTrigger className="run-trace__trigger">
+        <span className="run-trace__status-icon">
+          <ProcessIcon aria-hidden="true" className={processState === "running" ? "animate-spin" : undefined} />
+        </span>
+        <span className="run-trace__heading">
+          <strong>{processMeta.label}</strong>
+          <small aria-live="polite">{processMeta.summary}</small>
+        </span>
+        <ChevronDown aria-hidden="true" className="run-trace__chevron" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="run-trace__content">
+        <div className="run-trace__narrative" aria-label="分析摘要">
+          {trace.narrative.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+        </div>
+        <WorkProcessSection agentMap={agentMap} events={projected.events} onAgentSelect={selectAgent} summary={workSummary} />
+        <SubAgentSection
+          agents={projected.agents}
+          highlightedAgent={targetAgent}
           onOpenChange={(open) => {
             agentsTouched.current = true;
             setAgentsOpen(open);
           }}
           open={agentsOpen}
-        >
-          <SectionHeader icon={Users} summary={agentSummary} title="Subagent 协作" />
-          <CollapsibleContent className="run-section__content run-section__content--agents">
-            {projected.agents.map((agent) => (
-              <AgentRun agent={agent} highlighted={agent.id === targetAgent} key={agent.id} />
-            ))}
-          </CollapsibleContent>
-        </Collapsible>
-      ) : null}
-    </div>
+          summary={agentSummary}
+        />
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
