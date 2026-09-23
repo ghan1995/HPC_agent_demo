@@ -8,6 +8,7 @@ import {
 import { useState } from "react";
 
 import { ConversationView } from "./conversation-view";
+import { ArtifactPanel } from "./artifacts";
 import { HomeView } from "./home-view";
 import { Inspector } from "./inspector";
 import { initialSessionGroups } from "./data";
@@ -18,6 +19,8 @@ function AppContent() {
   const controller = usePromptInputController();
   const [view, setView] = useState<"home" | "history">("home");
   const [inspector, setInspector] = useState<InspectorMode>(null);
+  const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
+  const [artifactsOpen, setArtifactsOpen] = useState(false);
   const [submitted, setSubmitted] = useState("");
   const [groups, setGroups] = useState<SessionGroup[]>(initialSessionGroups);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -34,6 +37,7 @@ function AppContent() {
     setSelectedId(id);
     setView("history");
     setInspector(null);
+    setArtifactsOpen(false);
     setSubmitted("");
   }
 
@@ -67,6 +71,7 @@ function AppContent() {
     setView("home");
     setSelectedId(null);
     setInspector(null);
+    setInspectorCollapsed(false);
     setSubmitted("");
     controller.textInput.clear();
     controller.attachments.clear();
@@ -105,7 +110,9 @@ function AppContent() {
       ) : (
         <ConversationView
           inspector={inspector}
-          onInspectorChange={setInspector}
+          artifactsOpen={artifactsOpen}
+          onArtifactsOpenChange={setArtifactsOpen}
+          onInspectorChange={(mode) => { setInspector(mode); if (mode) setInspectorCollapsed(false); }}
           onPrepareSubmit={prepareSubmit}
           onSidebarToggle={() => setSidebarCollapsed(false)}
           onSubmit={handleSubmit}
@@ -113,7 +120,15 @@ function AppContent() {
           submitted={submitted}
         />
       )}
-      {inspector ? <Inspector mode={inspector} onClose={() => setInspector(null)} /> : null}
+      {view === "history" && artifactsOpen ? <ArtifactPanel onClose={() => setArtifactsOpen(false)} onOpen={(id) => { setInspector(id); setInspectorCollapsed(false); setArtifactsOpen(false); }} /> : null}
+      {inspector ? (
+        <Inspector
+          collapsed={inspectorCollapsed}
+          mode={inspector}
+          onCollapseChange={setInspectorCollapsed}
+          onModeChange={setInspector}
+        />
+      ) : null}
     </main>
   );
 }

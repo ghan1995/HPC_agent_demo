@@ -18,7 +18,7 @@ import {
   CheckCircle2,
   ChevronRight,
   ClipboardCopy,
-  FileText,
+  PackageOpen,
   MemoryStick,
   PanelLeftOpen,
   RefreshCw,
@@ -32,6 +32,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Composer } from "./composer";
+import { ArtifactCollection } from "./artifacts";
 import { createCurrentRoundTaskPlan, diagnosisTrace, submissionTaskPlan, submissionTrace } from "./data";
 import { RunTrace } from "./run-trace";
 import { TaskDock } from "./task-dock";
@@ -80,6 +81,8 @@ function planForApproval(state: ApprovalState): TaskPlan {
 
 export function ConversationView({
   inspector,
+  artifactsOpen,
+  onArtifactsOpenChange,
   onInspectorChange,
   onSidebarToggle,
   onSubmit,
@@ -88,6 +91,8 @@ export function ConversationView({
   submitted,
 }: {
   inspector: InspectorMode;
+  artifactsOpen: boolean;
+  onArtifactsOpenChange: (open: boolean) => void;
   onInspectorChange: (mode: InspectorMode) => void;
   onSidebarToggle: () => void;
   onSubmit: (message: PromptInputMessage) => void;
@@ -169,6 +174,7 @@ export function ConversationView({
             </div>
             <nav className="flex items-center gap-1" aria-label="对话工具">
               <Button aria-expanded={contextOpen} onClick={() => setContextOpen((value) => !value)} size="sm" variant="ghost"><Server data-icon="inline-start" />上下文<ChevronRight className={cn("transition-transform", contextOpen && "rotate-90")} data-icon="inline-end" /></Button>
+              <Button aria-expanded={artifactsOpen} onClick={() => onArtifactsOpenChange(!artifactsOpen)} size="sm" variant="ghost"><PackageOpen data-icon="inline-start" />产物<span className="toolbar-count">3</span></Button>
               <Button aria-pressed={inspector === "log"} onClick={() => onInspectorChange(inspector === "log" ? null : "log")} size="sm" variant="ghost"><ScrollText data-icon="inline-start" />运行日志</Button>
             </nav>
           </div>
@@ -192,11 +198,7 @@ export function ConversationView({
                   <p>建议将节点内存调整到 <strong>80 GB</strong> 后重新提交。当前脚本和输入文件可以继续复用；重新提交会创建一个新作业，需要你确认参数后执行。</p>
                 </div>
 
-                <Button className="artifact-link" onClick={() => onInspectorChange("artifact")} variant="outline">
-                  <span className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground"><FileText /></span>
-                  <span className="min-w-0 flex-1 text-left"><strong className="block truncate text-sm font-medium">作业诊断报告</strong><small className="block truncate text-xs text-muted-foreground">诊断结论、证据与调整建议 · Markdown</small></span>
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">查看<ChevronRight /></span>
-                </Button>
+                <ArtifactCollection onOpen={onInspectorChange} />
 
                 <MessageActions>
                   <MessageAction label={copied ? "已复制" : "复制回答"} onClick={copyAnswer} tooltip={copied ? "已复制" : "复制回答"} variant={copied ? "secondary" : "ghost"}>{copied ? <Check /> : <ClipboardCopy />}</MessageAction>

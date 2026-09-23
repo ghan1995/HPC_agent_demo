@@ -1,6 +1,18 @@
 import type { LucideIcon } from "lucide-react";
 
-export type InspectorMode = "artifact" | "evidence" | "comparison" | "log" | null;
+export type ArtifactId = "memory-trend" | "run-comparison" | "diagnosis-report";
+export type InspectorMode = ArtifactId | "evidence" | "comparison" | "log" | null;
+
+export type ArtifactItem = {
+  id: ArtifactId;
+  title: string;
+  description: string;
+  kind: "chart" | "table" | "document";
+  status: "updating" | "complete";
+  stage: "运行中生成" | "任务完成后生成";
+  updatedAt: string;
+  task: string;
+};
 export type ApprovalState = "requested" | "approved" | "rejected";
 export type FeedbackValue = "up" | "down" | null;
 export type TaskStatus = "completed" | "active" | "waiting" | "queued";
