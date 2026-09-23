@@ -4,15 +4,17 @@
 
 ## 建议阅读顺序
 
-1. [当前阶段工作进展与实现约束](current-stage.md)
-2. [项目启动与前端技术基线](../HPC智能体Demo_项目启动与前端技术基线.md)
-3. [Agent 协作设计指南](../HPC智能体Demo_Agent协作设计指南.md)
-4. [产品决策记录](../knowledge/decisions.md)
+1. [Agent 对话流输出规范](agent-conversation-output-spec.html)（[浏览器直接打开](https://ghan1995.github.io/HPC_agent_demo/docs/agent-conversation-output-spec.html)）
+2. [当前阶段工作进展与实现约束](current-stage.md)
+3. [项目启动与前端技术基线](../HPC智能体Demo_项目启动与前端技术基线.md)
+4. [Agent 协作设计指南](../HPC智能体Demo_Agent协作设计指南.md)
+5. [产品决策记录](../knowledge/decisions.md)
 
 ## 文档职责
 
 | 文档 | 职责 | 更新时机 |
 |---|---|---|
+| `docs/agent-conversation-output-spec.html` | Agent 对话输出结构、折叠边界、人工交互、状态披露和格式化示例 | 对话流程或输出组件规范变化时 |
 | `docs/current-stage.md` | 当前已实现能力、组件映射、视觉 Token、互动约束和未完成项 | 完成一个明确阶段后 |
 | `HPC智能体Demo_项目启动与前端技术基线.md` | 技术选型、运行方式、依赖和项目范围 | 框架、依赖或阶段边界变化时 |
 | `HPC智能体Demo_Agent协作设计指南.md` | 长期协作方式、HPC 语境、设计方法和安全原则 | 长期方法论变化时 |

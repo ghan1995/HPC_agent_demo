@@ -27,6 +27,8 @@ python3 -m http.server 4173 -d out
 
 ## 文档入口
 
+- **[直接打开 Agent 对话流输出规范](https://ghan1995.github.io/HPC_agent_demo/docs/agent-conversation-output-spec.html)**
+- [Agent 对话流输出规范（仓库文件）](docs/agent-conversation-output-spec.html)
 - [文档导航](docs/README.md)
 - [当前阶段工作进展与实现约束](docs/current-stage.md)
 - [项目启动与前端技术基线](HPC智能体Demo_项目启动与前端技术基线.md)
