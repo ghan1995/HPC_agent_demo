@@ -110,6 +110,27 @@ export function ConversationView({
     : approval === "approved"
       ? { approval: { id: "submit-874231", approved: true as const }, state: "output-available" as const }
       : { approval: { id: "submit-874231", approved: false as const }, state: "output-denied" as const };
+  const resolvedSubmissionTrace = useMemo(() => {
+    if (approval !== "approved") return submissionTrace;
+    return {
+      ...submissionTrace,
+      summary: "已完成 · 4 项活动",
+      duration: "12s",
+      defaultOpen: false,
+      defaultAgentsOpen: false,
+      narrative: [
+        ...submissionTrace.narrative.slice(0, 1),
+        "已获得操作确认，调度器已创建新作业并返回作业 ID 874232。",
+      ],
+      events: submissionTrace.events.map((event) => ({ ...event, status: "complete" as const })),
+      agents: submissionTrace.agents.map((agent) => ({
+        ...agent,
+        status: "完成" as const,
+        duration: agent.id === "submit-agent" ? "3.6s" : agent.duration,
+        output: agent.id === "submit-agent" ? { jobId: "874232", status: "QUEUED" } : agent.output,
+      })),
+    };
+  }, [approval]);
 
   async function copyAnswer() {
     await navigator.clipboard?.writeText("作业 874231 因内存使用超过申请值被系统终止。建议将单节点内存调整为 80 GB 后重新提交。");
@@ -200,8 +221,7 @@ export function ConversationView({
             <Message className="max-w-full" from="assistant">
               <div className="assistant-identity"><span><Sparkles /></span><strong>HPC Agent</strong></div>
               <MessageContent className="w-full overflow-visible">
-                <RunTrace trace={submissionTrace} />
-                <div className="assistant-copy"><p>已复用原作业脚本和输入文件，并将单节点内存从 <strong>64 GB</strong> 调整为 <strong>80 GB</strong>。提交会创建一个新作业，请先确认本次变更。</p></div>
+                <RunTrace key={approval} trace={resolvedSubmissionTrace} />
                 <Confirmation approval={approvalPart.approval} className="approval-panel" state={approvalPart.state}>
                   <ConfirmationTitle>关键操作确认</ConfirmationTitle>
                   <ConfirmationRequest>
@@ -217,6 +237,15 @@ export function ConversationView({
                     <ConfirmationAction onClick={() => setApproval("approved")}>确认并提交</ConfirmationAction>
                   </ConfirmationActions>
                 </Confirmation>
+                {approval === "approved" ? (
+                  <div className="assistant-copy submission-result">
+                    <p>提交完成。已按 <strong>80 GB / 节点</strong> 创建新作业 <strong>874232</strong>，当前状态为排队中。</p>
+                  </div>
+                ) : approval === "rejected" ? (
+                  <div className="assistant-copy submission-result">
+                    <p>本次提交已取消，调整后的参数已保留为草稿，没有创建新作业。</p>
+                  </div>
+                ) : null}
               </MessageContent>
             </Message>
           </ConversationContent>

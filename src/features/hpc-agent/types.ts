@@ -59,6 +59,7 @@ export type RunTrace = {
   title: string;
   summary: string;
   duration: string;
+  narrative: string[];
   defaultOpen: boolean;
   defaultAgentsOpen: boolean;
   events: RunEvent[];

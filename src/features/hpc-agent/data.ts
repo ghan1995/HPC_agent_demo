@@ -210,6 +210,10 @@ export const diagnosisTrace: RunTrace = {
   title: "思考过程",
   summary: "已完成 · 6 项活动",
   duration: "30s",
+  narrative: [
+    "先检查调度终止原因，再用运行日志与资源曲线交叉验证，避免只根据单一退出码判断。",
+    "三类证据一致指向内存超限，应用日志中没有发现独立的代码异常。",
+  ],
   defaultOpen: false,
   defaultAgentsOpen: false,
   events: [
@@ -307,6 +311,10 @@ export const submissionTrace: RunTrace = {
   title: "思考过程",
   summary: "等待确认 · 4 项活动",
   duration: "8s",
+  narrative: [
+    "已读取原作业配置，并将单节点内存参数从 64 GB 调整为 80 GB。",
+    "策略与配额检查已通过；创建新作业属于外部写操作，正在等待你的确认。",
+  ],
   defaultOpen: true,
   defaultAgentsOpen: true,
   events: [

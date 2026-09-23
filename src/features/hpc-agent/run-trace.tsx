@@ -392,6 +392,9 @@ export function RunTrace({
         <ChevronDown aria-hidden="true" className="run-trace__chevron" />
       </CollapsibleTrigger>
       <CollapsibleContent className="run-trace__content">
+        <div className="run-trace__narrative" aria-label="分析摘要">
+          {trace.narrative.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+        </div>
         <WorkProcessSection agentMap={agentMap} events={projected.events} onAgentSelect={selectAgent} summary={workSummary} />
         <SubAgentSection
           agents={projected.agents}
