@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HPC Agent 对话流输出规范</title>
+  <style>
+    :root {
+      --ink: #17223b;
+      --text: #344054;
+      --muted: #667085;
+      --line: #dfe4ec;
+      --line-strong: #cbd3df;
+      --blue: #1769e0;
+      --blue-soft: #eef5ff;
+      --green: #138a52;
+      --green-soft: #eaf8f0;
+      --amber: #b15c00;
+      --amber-soft: #fff5e5;
+      --red: #c9362b;
+      --red-soft: #fff0ef;
+      --surface: #f7f9fc;
+      --code: #101828;
+      --radius: 10px;
+      --shadow: 0 10px 32px rgb(17 24 39 / 7%);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: #fff;
+      font-family: Inter, "SF Pro Text", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.72;
+    }
+    a { color: inherit; }
+    button { font: inherit; }
+    code, .mono {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 980px);
+      gap: 64px;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 36px 96px;
+    }
+    .toc {
+      position: sticky;
+      top: 0;
+      align-self: start;
+      height: 100vh;
+      padding: 34px 0;
+      border-right: 1px solid var(--line);
+    }
+    .toc-brand {
+      margin-bottom: 34px;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 760;
+      letter-spacing: .02em;
+    }
+    .toc-brand small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .toc nav { display: grid; gap: 3px; padding-right: 24px; }
+    .toc a {
+      display: block;
+      padding: 7px 10px;
+      border-left: 2px solid transparent;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+      text-decoration: none;
+      transition: .16s ease;
+    }
+    .toc a:hover, .toc a.active {
+      border-left-color: var(--blue);
+      color: var(--blue);
+      background: var(--blue-soft);
+    }
+    .toc-meta {
+      position: absolute;
+      bottom: 28px;
+      color: #98a2b3;
+      font-size: 11px;
+      line-height: 1.6;
+    }
+    main { min-width: 0; }
+    .hero {
+      padding: 72px 0 44px;
+      border-bottom: 1px solid var(--line-strong);
+    }
+    h1, h2, h3, h4 { color: var(--ink); line-height: 1.28; }
+    h1 { margin: 0 0 18px; font-size: clamp(32px, 4vw, 48px); letter-spacing: -.035em; }
+    .hero p { max-width: 780px; margin: 0; font-size: 17px; color: #475467; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 16px 28px; margin-top: 28px; color: var(--muted); font-size: 12px; }
+    section { padding: 54px 0 12px; scroll-margin-top: 24px; }
+    h2 { margin: 0 0 12px; font-size: 27px; letter-spacing: -.02em; }
+    h3 { margin: 30px 0 10px; font-size: 19px; }
+    .section-lead { max-width: 780px; margin: 0 0 30px; color: var(--muted); }
+    .rule { height: 1px; background: var(--line); margin-top: 44px; }
+
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--line);
+      border-radius: var(--radius);
+    }
+    .principle { min-height: 150px; padding: 22px; background: #fff; }
+    .principle b { display: block; margin-bottom: 8px; color: var(--ink); }
+    .principle p { margin: 0; color: var(--muted); font-size: 13px; }
+    .index { display: inline-grid; place-items: center; width: 24px; height: 24px; margin-bottom: 16px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(92px, 1fr));
+      gap: 0;
+      padding: 26px 12px;
+      border-block: 1px solid var(--line);
+    }
+    .flow-step { position: relative; text-align: center; }
+    .flow-step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 15px;
+      left: calc(50% + 22px);
+      right: calc(-50% + 22px);
+      height: 1px;
+      background: #a9b6c8;
+    }
+    .flow-num { position: relative; z-index: 1; display: grid; place-items: center; width: 31px; height: 31px; margin: 0 auto 11px; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 700; }
+    .flow-step b { display: block; color: var(--ink); font-size: 12px; }
+    .flow-step span { display: block; margin-top: 5px; color: #98a2b3; font-size: 10px; line-height: 1.4; }
+
+    .legend { display: flex; gap: 18px; justify-content: flex-end; margin: 12px 0; color: var(--muted); font-size: 12px; }
+    .required, .optional, .conditional { font-weight: 700; }
+    .required { color: var(--blue); }
+    .optional { color: var(--muted); }
+    .conditional { color: var(--amber); }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 12px 13px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th:last-child, td:last-child { border-right: 0; }
+    tr:last-child td { border-bottom: 0; }
+    th { color: var(--ink); background: var(--surface); font-weight: 680; white-space: nowrap; }
+    td.center { text-align: center; font-size: 15px; }
+
+    .anatomy { display: grid; gap: 0; border-top: 1px solid var(--line-strong); }
+    .anatomy-row {
+      display: grid;
+      grid-template-columns: 64px 150px 1fr 250px;
+      gap: 20px;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .anatomy-row h3 { margin: 2px 0 5px; font-size: 16px; }
+    .anatomy-row p, .anatomy-row ul { margin: 0; font-size: 13px; }
+    .anatomy-row ul { padding-left: 18px; }
+    .anatomy-number { display: grid; place-items: center; align-self: start; width: 34px; height: 34px; border-radius: 50%; color: #fff; background: var(--blue); font-weight: 700; }
+    .anatomy-goal { color: var(--muted); }
+    .mini-output { padding: 13px 14px; border-left: 3px solid var(--blue); background: var(--blue-soft); color: #253b62; font-size: 12px; line-height: 1.6; }
+
+    .callout {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 12px;
+      padding: 18px 20px;
+      border: 1px solid #bcd4f6;
+      border-radius: var(--radius);
+      background: var(--blue-soft);
+      color: #25446f;
+      font-size: 13px;
+    }
+    .callout strong { display: block; margin-bottom: 3px; color: #15385f; }
+
+    .approval-flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin: 24px 0;
+    }
+    .approval-node {
+      position: relative;
+      padding: 15px 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+    .approval-node:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      top: 50%;
+      right: -12px;
+      z-index: 1;
+      width: 14px;
+      color: #98a2b3;
+      background: #fff;
+      transform: translateY(-50%);
+    }
+    .approval-node b { display: block; margin-bottom: 3px; color: var(--ink); }
+    .approval-node.attention { border-color: #e5b66f; background: var(--amber-soft); }
+    .approval-card {
+      margin: 14px 0;
+      border: 1px solid #e5b66f;
+      border-radius: 9px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .approval-card.input-card { border-color: #9fc2f3; }
+    .input-card .approval-title { border-bottom-color: #cfe0f7; background: var(--blue-soft); }
+    .input-card .approval-title b { color: #174d91; }
+    .input-card .approval-title span { color: #52739d; }
+    .choice-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .choice {
+      min-width: 64px;
+      padding: 8px 13px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .choice.selected { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); }
+    .interaction-record {
+      margin: 12px 0;
+      padding: 9px 12px;
+      border-left: 3px solid var(--blue);
+      background: #f6f9fd;
+      color: #4d617b;
+      font-size: 12px;
+    }
+    .approval-title { padding: 14px 16px; border-bottom: 1px solid #f0d8b4; background: var(--amber-soft); }
+    .approval-title b { display: block; color: #5f350b; font-size: 14px; }
+    .approval-title span { color: #8a551d; font-size: 11px; }
+    .approval-body { padding: 15px 16px; }
+    .approval-data { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; margin-bottom: 12px; }
+    .approval-data span { color: var(--muted); font-size: 11px; }
+    .approval-data b { float: right; color: var(--ink); }
+    .approval-warning { padding: 9px 10px; background: var(--surface); color: #75400b; font-size: 11px; }
+    .approval-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); }
+    .action { padding: 7px 12px; border: 1px solid var(--line-strong); border-radius: 6px; color: var(--text); background: #fff; font-size: 11px; font-weight: 650; }
+    .action.primary { border-color: var(--blue); color: #fff; background: var(--blue); }
+    .audit-record { padding: 10px 12px; border-left: 3px solid var(--green); background: var(--green-soft); color: #12613d; font-size: 12px; }
+    .branch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
+    .branch { padding: 16px; border-top: 3px solid var(--line-strong); background: var(--surface); font-size: 12px; }
+    .branch b { display: block; margin-bottom: 5px; color: var(--ink); }
+
+    .example-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .example { overflow: hidden; border: 1px solid var(--line-strong); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); }
+    .example-head { padding: 16px 18px; border-bottom: 1px solid var(--line); background: var(--surface); }
+    .example-head h3 { margin: 0 0 3px; font-size: 16px; }
+    .example-head p { margin: 0; color: var(--muted); font-size: 12px; }
+    .message { display: grid; grid-template-columns: 56px 1fr; gap: 12px; padding: 18px; border-bottom: 1px solid var(--line); }
+    .message:last-child { border-bottom: 0; }
+    .speaker { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .bubble { font-size: 13px; }
+    .bubble p { margin: 0 0 10px; }
+    .bubble p:last-child { margin-bottom: 0; }
+    .agent-message { border-left: 3px solid var(--blue); }
+    .stage-label { display: inline-block; margin: 11px 0 4px; color: var(--blue); font-size: 11px; font-weight: 750; letter-spacing: .03em; }
+    .stage-label:first-child { margin-top: 0; }
+    .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; margin: 6px 0 12px; padding: 10px 12px; background: var(--surface); }
+    .facts span { color: var(--muted); font-size: 11px; }
+    .facts b { color: var(--code); }
+    .status-line { display: flex; align-items: center; gap: 7px; margin: 7px 0; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex: none; }
+    .success .dot { background: var(--green); }
+    .running .dot { background: var(--blue); box-shadow: 0 0 0 4px var(--blue-soft); }
+    .warning .dot { background: var(--amber); }
+    .failed .dot { background: var(--red); }
+    .result { margin-top: 10px; padding: 11px 12px; border-left: 3px solid var(--green); background: var(--green-soft); color: #12613d; }
+    .risk { margin-top: 10px; padding: 11px 12px; border-left: 3px solid var(--amber); background: var(--amber-soft); color: #75400b; }
+    .thinking {
+      margin: 0 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .thinking summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 680;
+      cursor: pointer;
+      list-style: none;
+    }
+    .thinking summary::-webkit-details-marker { display: none; }
+    .thinking summary::before { content: "◌"; color: var(--blue); font-size: 15px; }
+    .thinking summary span:first-of-type { margin-right: auto; }
+    .thinking summary small { color: var(--muted); font-weight: 500; }
+    .thinking[open] summary { border-bottom: 1px solid var(--line); }
+    .thinking-steps { display: grid; gap: 7px; padding: 11px 12px 12px 35px; color: var(--muted); font-size: 12px; }
+    .thinking-steps span { position: relative; }
+    .thinking-steps span::before { content: ""; position: absolute; width: 5px; height: 5px; left: -15px; top: 8px; border-radius: 50%; background: #98a2b3; }
+    .surface-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 22px 0; }
+    .surface-legend > div { padding: 15px 17px; border: 1px solid var(--line); border-radius: 8px; font-size: 12px; color: var(--muted); }
+    .surface-legend b { display: block; margin-bottom: 5px; font-size: 13px; }
+    .surface-legend .collapsible { border-style: dashed; background: var(--surface); }
+    .surface-legend .collapsible b { color: #596579; }
+    .surface-legend .persistent { border-color: #bcd4f6; background: var(--blue-soft); }
+    .surface-legend .persistent b { color: var(--blue); }
+    .final-output { margin-top: 12px; padding-top: 12px; border-top: 2px solid #bcd4f6; }
+    .zone-label { display: flex; align-items: center; gap: 7px; margin-bottom: 11px; color: var(--blue); font-size: 11px; font-weight: 750; letter-spacing: .02em; }
+    .zone-label::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
+    .component-name { color: var(--ink); font-weight: 680; white-space: nowrap; }
+    .component-kind { display: block; color: var(--muted); font-size: 11px; font-weight: 500; }
+
+    .states { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .state { padding: 18px; border: 1px solid var(--line); border-radius: 8px; }
+    .state b { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--ink); font-size: 13px; }
+    .state p { margin: 0; color: var(--muted); font-size: 12px; }
+
+    .disclosure { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .disclosure > div { padding: 22px 0; border-block: 1px solid var(--line); }
+    .disclosure h3 { margin: 0 0 12px; }
+    .disclosure ol { margin: 0; padding-left: 20px; font-size: 13px; }
+
+    .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 0 42px; padding: 26px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--surface); }
+    .check { display: grid; grid-template-columns: 18px 1fr; gap: 10px; padding: 9px 0; font-size: 13px; }
+    .box { width: 15px; height: 15px; margin-top: 4px; border: 1.5px solid #98a2b3; border-radius: 3px; background: #fff; }
+    footer { margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line); color: #98a2b3; font-size: 11px; }
+
+    @media (max-width: 980px) {
+      .layout { display: block; padding: 0 24px 72px; }
+      .toc { position: static; height: auto; padding: 22px 0 12px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .toc-brand { margin-bottom: 12px; }
+      .toc nav { display: flex; overflow-x: auto; gap: 6px; padding: 0 0 10px; }
+      .toc a { flex: none; border: 1px solid var(--line); border-radius: 6px; }
+      .toc a:hover, .toc a.active { border-color: #bcd4f6; }
+      .toc-meta { display: none; }
+      .hero { padding-top: 44px; }
+      .flow { grid-template-columns: repeat(4, 1fr); gap: 26px 0; }
+      .flow-step::after { display: none; }
+      .approval-flow { grid-template-columns: repeat(3, 1fr); }
+      .approval-node::after { display: none; }
+      .anatomy-row { grid-template-columns: 44px 130px 1fr; }
+      .mini-output { grid-column: 2 / -1; }
+      .example-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 680px) {
+      body { font-size: 14px; }
+      .layout { padding-inline: 16px; }
+      h1 { font-size: 32px; }
+      h2 { font-size: 23px; }
+      .principles, .states, .disclosure, .checklist, .surface-legend { grid-template-columns: 1fr; }
+      .approval-flow, .branch-grid, .approval-data { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: repeat(2, 1fr); }
+      .anatomy-row { grid-template-columns: 38px 1fr; gap: 14px 10px; }
+      .anatomy-row > ul, .mini-output { grid-column: 2; }
+      .message { grid-template-columns: 1fr; gap: 5px; }
+      .facts { grid-template-columns: 1fr; }
+    }
+    @media print {
+      .layout { display: block; max-width: none; padding: 0; }
+      .toc { display: none; }
+      .hero { padding-top: 0; }
+      .example { box-shadow: none; break-inside: avoid; }
+      section { break-inside: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="toc" aria-label="目录">
+      <div class="toc-brand">HPC Agent<small>对话输出规范</small></div>
+      <nav>
+        <a href="#purpose">1. 规范目标</a>
+        <a href="#flow">2. 标准对话流</a>
+        <a href="#matrix">3. 必选与可选矩阵</a>
+        <a href="#anatomy">4. 各阶段说明</a>
+        <a href="#examples">5. 格式化示例</a>
+        <a href="#status">6. 状态与披露规则</a>
+        <a href="#checklist">7. 输出前检查</a>
+      </nav>
+      <div class="toc-meta">独立规范文档<br />版本 1.0 · 2026-09-22</div>
+    </aside>
+
+    <main>
+      <header class="hero">
+        <h1>HPC Agent 对话流输出规范</h1>
+        <p>为作业提交、故障处理、资源申请、环境配置和通用咨询建立统一、可预测的回答骨架。结构保持一致，内容按任务复杂度和风险动态增减。</p>
+        <div class="hero-meta"><span>适用对象：HPC Agent 产品与交互设计</span><span>原则：先确认，再计划，再执行，最后闭环</span></div>
+      </header>
+
+      <section id="purpose">
+        <h2>1. 规范目标</h2>
+        <p class="section-lead">统一的是信息顺序与表达责任，不是强迫所有任务输出相同长度。简单咨询可以压缩为三段，执行型任务则完整展示过程、状态和结果。</p>
+        <div class="principles">
+          <article class="principle"><span class="index">1</span><b>可预期</b><p>用户在不同主题下都能快速找到需求理解、方案、执行结果和下一步。</p></article>
+          <article class="principle"><span class="index">2</span><b>可审计</b><p>关键输入、操作、证据和结果有明确来源；展示可审计过程，而不是模型私有思维链。</p></article>
+          <article class="principle"><span class="index">3</span><b>可行动</b><p>每轮输出都明确当前状态、是否需要确认，以及用户接下来能做什么。</p></article>
+        </div>
+        <div class="callout" style="margin-top:20px"><span>ⓘ</span><div><strong>“思考”在界面中的正确含义</strong>展示经过整理的任务理解、判断依据和执行计划；不展示模型逐字推理、内部草稿或不可验证的思维过程。</div></div>
+      </section>
+
+      <section id="flow">
+        <h2>2. 标准对话流</h2>
+        <p class="section-lead">七个阶段描述 Agent 的工作逻辑，不代表七段内容都要永久留在对话里。理解、规划和执行过程进入“思考中”，任务完成后折叠；结果、风险、产物和下一步进入“最终呈现”，始终可见。需要用户操作的交互卡片独立于两者，在等待期间保持可见。</p>
+        <div class="surface-legend">
+          <div class="collapsible"><b>可折叠 · 工作过程</b>理解需求、参数检查、方案规划、执行进度、工具调用、Subagent 协作和过程证据。完成后收起为耗时与阶段摘要。</div>
+          <div class="persistent"><b>始终可见 · 最终呈现</b>结果结论、关键证据、风险、生成产物和后续操作。用户无需重新展开过程即可获得完整答案。</div>
+        </div>
+        <div class="flow" aria-label="七阶段标准对话流">
+          <div class="flow-step"><span class="flow-num">1</span><b>理解需求</b><span>识别目标与缺口</span></div>
+          <div class="flow-step"><span class="flow-num">2</span><b>需求摘要</b><span>确认范围与约束</span></div>
+          <div class="flow-step"><span class="flow-num">3</span><b>方案与计划</b><span>说明步骤和判断点</span></div>
+          <div class="flow-step"><span class="flow-num">4</span><b>执行过程</b><span>展示进度与证据</span></div>
+          <div class="flow-step"><span class="flow-num">5</span><b>结果结论</b><span>回答是否完成</span></div>
+          <div class="flow-step"><span class="flow-num">6</span><b>风险提示</b><span>说明影响与限制</span></div>
+          <div class="flow-step"><span class="flow-num">7</span><b>后续建议</b><span>提供下一步入口</span></div>
+        </div>
+      </section>
+
+      <section id="matrix">
+        <h2>3. 必选与可选矩阵</h2>
+        <p class="section-lead">需要区分两类结构：七阶段是回答内容的主流程；参考资料、工具、确认、产物等是按任务触发的横切组件。主流程保持顺序稳定，横切组件插入对应阶段。</p>
+        <h3>3.1 主流程阶段矩阵</h3>
+        <div class="legend"><span><b class="required">●</b> 必选</span><span><b class="conditional">◆</b> 条件必选</span><span><b class="optional">○</b> 可选</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>任务主题</th><th>理解需求</th><th>需求摘要</th><th>方案与计划</th><th>执行过程</th><th>结果结论</th><th>风险提示</th><th>后续建议</th></tr></thead>
+            <tbody>
+              <tr><td><b>作业提交</b></td><td class="center required">●</td><td class="center required">●</td><td class="center required">●</td><td class="center required">●</td><td class="center required">●</td><td class="center conditional">◆</td><td class="center optional">○</td></tr>
+              <tr><td><b>故障处理</b></td><td class="center required">●</td><td class="center required">●</td><td class="center required">●</td><td class="center required">●</td><td class="center required">●</td><td class="center required">●</td><td class="center required">●</td></tr>
+              <tr><td><b>资源申请</b></td><td class="center required">●</td><td class="center required">●</td><td class="center required">●</td><td class="center conditional">◆</td><td class="center required">●</td><td class="center conditional">◆</td><td class="center optional">○</td></tr>
+              <tr><td><b>环境配置</b></td><td class="center required">●</td><td class="center required">●</td><td class="center required">●</td><td class="center conditional">◆</td><td class="center required">●</td><td class="center conditional">◆</td><td class="center required">●</td></tr>
+              <tr><td><b>通用咨询</b></td><td class="center required">●</td><td class="center required">●</td><td class="center optional">○</td><td class="center optional">○</td><td class="center required">●</td><td class="center optional">○</td><td class="center optional">○</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="color:var(--muted);font-size:12px">条件必选：涉及真实操作、资源消耗、安全风险、权限变化、数据覆盖或需要用户确认时必须出现。</p>
+        <h3>3.2 横切对话组件清单</h3>
+        <p class="section-lead">这些组件不是额外的固定步骤，而是用于承载证据、协作、确认和产物。出现位置由其所属阶段决定。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>组件</th><th>何时需要</th><th>放置位置</th><th>默认呈现</th><th>必要性</th></tr></thead>
+            <tbody>
+              <tr><td class="component-name">思考过程<span class="component-kind">Reasoning</span></td><td>需要分析、规划、工具选择或风险判断；简单直接回答可不展示</td><td>正式回答之前</td><td>运行时显示“思考中”和高层过程；完成后默认收起为耗时摘要</td><td class="conditional">条件必选</td></tr>
+              <tr><td class="component-name">澄清提问<span class="component-kind">Clarification</span></td><td>缺失信息会改变方案、风险或执行结果</td><td>理解需求之后</td><td>只问关键问题，避免一次追问过多</td><td class="conditional">条件必选</td></tr>
+              <tr><td class="component-name">任务计划<span class="component-kind">Plan</span></td><td>多步骤、长耗时或需跨工具协作</td><td>“思考中”内部</td><td>运行时展开；任务结束后随工作过程收起</td><td class="conditional">条件必选</td></tr>
+              <tr><td class="component-name">执行进度<span class="component-kind">Progress</span></td><td>发生真实执行、等待或长时间处理</td><td>“思考中”内部</td><td>运行时展示阶段状态；任务结束后折叠</td><td class="conditional">条件必选</td></tr>
+              <tr><td class="component-name">工具调用<span class="component-kind">Tool call</span></td><td>使用命令、API、调度器、文件或外部系统</td><td>对应执行步骤内</td><td>工具名和状态可见，输入输出折叠</td><td class="conditional">条件必选</td></tr>
+              <tr><td class="component-name">Subagent 协作<span class="component-kind">Agent collaboration</span></td><td>存在并行分工、专业角色或多 Agent 协同</td><td>“思考中”内部，与工作过程并列</td><td>思考过程展开后显示协作摘要，职责和输入输出按需展开；随完整结论输出一同收起</td><td class="optional">可选</td></tr>
+              <tr><td class="component-name">操作确认<span class="component-kind">Confirmation</span></td><td>提交、删除、覆盖、权限、费用或明显资源消耗</td><td>方案之后、执行之前</td><td>明确操作、影响、参数和确认按钮</td><td class="conditional">条件必选</td></tr>
+              <tr><td class="component-name">参考资料与来源<span class="component-kind">Sources</span></td><td>使用外部事实、官方文档、日志证据或检索结果</td><td>相关结论附近；末尾可集中索引</td><td>正文就近引用，详细清单折叠</td><td class="conditional">条件必选</td></tr>
+              <tr><td class="component-name">产物与附件<span class="component-kind">Artifacts</span></td><td>生成脚本、配置、报告、图表、文件或链接</td><td>执行结果之后</td><td>名称、类型、状态和打开/下载入口</td><td class="conditional">条件必选</td></tr>
+              <tr><td class="component-name">异常与恢复<span class="component-kind">Error recovery</span></td><td>执行失败、部分完成、权限不足或外部系统不可用</td><td>失败发生处与结果结论</td><td>失败点、影响、已完成部分和恢复路径</td><td class="conditional">条件必选</td></tr>
+              <tr><td class="component-name">后续操作<span class="component-kind">Next actions</span></td><td>存在自然的继续路径或多个可选处理方案</td><td>回答末尾</td><td>最多一到三个具体动作</td><td class="optional">可选</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout" style="margin-top:20px"><span>↗</span><div><strong>参考资料不是统一放在回答末尾</strong>用于支撑关键判断的来源应靠近对应结论；当来源较多时，再在末尾提供完整索引。日志、命令输出和监控数据属于“执行证据”，外部文档、网页和知识库属于“参考资料”。</div></div>
+      </section>
+
+      <section id="anatomy">
+        <h2>4. 各阶段内容责任</h2>
+        <p class="section-lead">每一阶段只承担一种主要责任。第 1–4 阶段属于可折叠的工作过程；第 5–7 阶段属于始终可见的最终呈现。</p>
+        <div class="anatomy">
+          <article class="anatomy-row"><div class="anatomy-number">1</div><div><h3>理解需求</h3><p class="anatomy-goal">识别意图与信息缺口</p></div><ul><li>判断任务主题与用户目标</li><li>区分事实、假设与待确认项</li><li>必要时只询问会改变方案的关键问题</li></ul><div class="mini-output">“我理解你要在 GPU 集群上提交一个训练作业，并确认资源参数是否合理。”</div></article>
+          <article class="anatomy-row"><div class="anatomy-number">2</div><div><h3>需求摘要</h3><p class="anatomy-goal">让双方确认同一件事</p></div><ul><li>提炼目标、对象和成功标准</li><li>列出已知参数与约束</li><li>标注缺失信息，不重复用户原话</li></ul><div class="mini-output">“目标：提交训练任务；资源：4 × A100；入口脚本：train.py；队列：gpu。”</div></article>
+          <article class="anatomy-row"><div class="anatomy-number">3</div><div><h3>方案与计划</h3><p class="anatomy-goal">说明准备怎么做</p></div><ul><li>给出可执行的步骤与顺序</li><li>标注需要确认或可能分支的节点</li><li>复杂任务给出计划，简单任务可压缩成一句</li></ul><div class="mini-output">“先检查参数与队列约束，再生成脚本，确认后提交，最后回传作业 ID。”</div></article>
+          <article class="anatomy-row"><div class="anatomy-number">4</div><div><h3>执行过程</h3><p class="anatomy-goal">展示进度、证据与操作</p></div><ul><li>仅展示有用户价值的阶段进度</li><li>工具调用、Subagent 和证据按需展开</li><li>状态使用文字与图标共同表达</li></ul><div class="mini-output">“✓ 参数检查通过　● 正在生成脚本　○ 等待提交确认”</div></article>
+          <article class="anatomy-row"><div class="anatomy-number">5</div><div><h3>结果结论</h3><p class="anatomy-goal">直接回答是否完成</p></div><ul><li>首句给出结论，不让用户自行归纳</li><li>提供结果标识、关键证据或失败原因</li><li>失败也必须形成明确结论</li></ul><div class="mini-output">“作业已成功提交，作业 ID 为 123456，当前状态为 PENDING。”</div></article>
+          <article class="anatomy-row"><div class="anatomy-number">6</div><div><h3>风险提示</h3><p class="anatomy-goal">说明影响、边界与不确定性</p></div><ul><li>解释风险发生条件与影响范围</li><li>给出规避或恢复方式</li><li>不能确认时明确说明证据不足</li></ul><div class="mini-output">“当前队列较拥塞，预计等待约 2 小时；该时间基于当前快照，可能变化。”</div></article>
+          <article class="anatomy-row"><div class="anatomy-number">7</div><div><h3>后续建议</h3><p class="anatomy-goal">提供自然的下一步</p></div><ul><li>优先提供一到两个最相关操作</li><li>使用具体动作，不使用泛泛的“还有问题吗”</li><li>必要时附查看位置或命令</li></ul><div class="mini-output">“接下来可以持续查看排队状态，或在等待过长时切换到 gpu-short 队列。”</div></article>
+        </div>
+      </section>
+
+      <section id="examples">
+        <h2>5. 带格式的对话示例</h2>
+        <p class="section-lead">示例保持同一骨架，但会根据任务性质改变篇幅、确认点和风险信息。</p>
+        <div class="example-grid">
+          <article class="example">
+            <div class="example-head"><h3>示例 A：作业提交</h3><p>执行型任务 · 含操作确认</p></div>
+            <div class="message"><div class="speaker">用户</div><div class="bubble">帮我在 GPU 集群上提交训练作业，4 张 A100，运行 train.py。</div></div>
+            <div class="message agent-message"><div class="speaker">Agent</div><div class="bubble">
+              <details class="thinking" open><summary><span>思考中 · 等待补充参数</span><small>完成后折叠</small></summary><div class="thinking-steps"><span>已识别目标：在 gpu-cluster 使用 4 × A100 运行 train.py</span><span>发现运行时限缺失，该参数会改变调度限制和资源消耗</span><span>计划：补全参数 → 生成脚本 → 预览配置 → 确认后提交</span></div></details>
+              <div class="risk">缺少预计运行时长。该参数会影响调度限制和资源消耗，需要补充后才能继续生成。</div>
+              <div class="approval-card input-card">
+                <div class="approval-title"><b>补充运行时限</b><span>选择预计运行时长；提交前仍可修改</span></div>
+                <div class="approval-body">
+                  <div class="choice-group" aria-label="运行时限选项"><span class="choice">1 小时</span><span class="choice selected">4 小时</span><span class="choice">8 小时</span><span class="choice">自定义</span></div>
+                </div>
+                <div class="approval-actions"><span class="action primary">应用并继续</span></div>
+              </div>
+            </div></div>
+            <div class="message agent-message"><div class="speaker">Agent</div><div class="bubble">
+              <details class="thinking" open><summary><span>思考中 · 等待操作确认</span><small>完成后折叠</small></summary><div class="thinking-steps"><span>已应用用户选择：运行时限 4 小时</span><span>资源参数检查通过，提交脚本已生成</span><span>真实提交会占用集群资源，需要用户明确授权</span></div></details>
+              <div class="approval-card">
+                <div class="approval-title"><b>确认提交作业</b><span>确认后将创建真实作业并占用集群资源</span></div>
+                <div class="approval-body"><div class="approval-data"><span>集群 <b>gpu-cluster</b></span><span>资源 <b>4 × A100</b></span><span>时限 <b>4 小时</b></span><span>预计消耗 <b>16 GPU·小时</b></span></div><div class="approval-warning">该操作会创建真实作业；提交后可以取消，但已消耗的计算资源无法撤回。</div></div>
+                <div class="approval-actions"><span class="action">返回修改</span><span class="action primary">确认提交</span></div>
+              </div>
+            </div></div>
+            <div class="message agent-message"><div class="speaker">Agent</div><div class="bubble">
+              <details class="thinking"><summary><span>工作过程 · 已完成</span><small>已折叠 · 5 个阶段</small></summary><div class="thinking-steps"><span>参数补全与检查完成</span><span>脚本生成并经用户确认</span><span>作业提交工具调用成功</span></div></details>
+              <div class="final-output"><div class="zone-label">最终呈现 · 始终可见</div>
+                <div class="audit-record">✓ 用户已确认提交 · 2026-09-23 10:32</div>
+                <span class="stage-label">结果结论</span>
+                <div class="result"><b>作业提交成功</b><br />作业 ID：123456　当前状态：PENDING</div>
+                <span class="stage-label">后续建议</span><p>可以继续查看排队状态；若等待超过 2 小时，建议检查 gpu-short 队列的可用性。</p>
+              </div>
+            </div></div>
+          </article>
+
+          <article class="example">
+            <div class="example-head"><h3>示例 B：故障处理</h3><p>诊断型任务 · 强调证据与风险</p></div>
+            <div class="message"><div class="speaker">用户</div><div class="bubble">作业 874231 一直是 PENDING，帮我看看为什么。</div></div>
+            <div class="message agent-message"><div class="speaker">Agent</div><div class="bubble">
+              <details class="thinking" open><summary><span>思考中 · 正在诊断</span><small>完成后折叠</small></summary><div class="thinking-steps"><span>识别为作业排队诊断，先核实当前状态和调度事件</span><span>排查路径：队列策略 → 资源请求 → 集群可用量</span><span>作业状态与调度事件已读取，队列策略检查完成</span><span>正在核对 GPU 与连续内存可用量</span></div></details>
+            </div></div>
+            <div class="message agent-message"><div class="speaker">Agent</div><div class="bubble">
+              <details class="thinking"><summary><span>工作过程 · 已完成</span><small>已折叠 · 4 个阶段</small></summary><div class="thinking-steps"><span>状态、策略和资源可用量检查完成</span><span>根因已由调度证据交叉确认</span></div></details>
+              <div class="final-output"><div class="zone-label">最终呈现 · 始终可见</div>
+                <span class="stage-label">结果结论</span>
+                <div class="result"><b>已定位主要原因</b><br />作业请求 80 GB 内存，但当前目标节点可连续提供的最大空闲内存为 64 GB，因此暂时无法匹配资源。</div>
+                <span class="stage-label">关键证据</span>
+                <div class="facts"><span>作业状态　<b>PENDING</b></span><span>请求内存　<b>80 GB</b></span><span>最大可用　<b>64 GB</b></span><span>调度原因　<b>Resources</b></span></div>
+                <span class="stage-label">风险与建议</span>
+                <div class="risk">降低内存可能导致运行中 OOM。建议先核对历史峰值，再决定是否调整。</div>
+                <p>推荐方案：若历史峰值低于 60 GB，将请求调整为 64 GB 后重新提交；否则改投大内存队列。</p>
+              </div>
+            </div></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="status">
+        <h2>6. 状态与渐进披露规则</h2>
+        <p class="section-lead">状态必须同时依靠文字、图标和位置表达；颜色只作为辅助。信息量随任务复杂度增加，但首屏始终保留结论性信息。</p>
+        <div class="states">
+          <article class="state success"><b><i class="dot"></i>已完成</b><p>操作成功或阶段结束。必须给出结果，不只写“完成”。</p></article>
+          <article class="state running"><b><i class="dot"></i>进行中</b><p>说明当前正在做什么，避免持续刷出低价值日志。</p></article>
+          <article class="state warning"><b><i class="dot"></i>等待 / 风险</b><p>说明等待对象、用户是否需要行动以及潜在影响。</p></article>
+          <article class="state failed"><b><i class="dot"></i>失败</b><p>说明失败点、已完成部分、影响范围和可恢复路径。</p></article>
+        </div>
+        <div class="disclosure">
+          <div><h3>任务结束后始终可见</h3><ol><li>结果结论和完成状态</li><li>支撑结论的关键证据</li><li>风险、限制及恢复方式</li><li>产物入口和后续操作</li></ol></div>
+          <div><h3>任务结束后默认折叠</h3><ol><li>任务理解、信息缺口和方案计划</li><li>执行进度、工具调用与原始输出</li><li>Subagent 分工和详细运行记录</li><li>过程日志、临时配置及中间产物</li></ol></div>
+        </div>
+        <h3>6.1 人工交互作为运行中断点</h3>
+        <p class="section-lead">需要用户输入或授权时，使用独立交互卡片暂停流程，而不是预设一条用户自然语言回复。卡片必须提升到“思考中”容器之外，避免在过程收起后被隐藏；后续工具和 Subagent 暂停执行。</p>
+        <div class="disclosure">
+          <div><h3>参数补充卡片</h3><ol><li>用于选择时限、队列、资源规格等缺失参数</li><li>提供推荐值、常用选项和自定义入口</li><li>操作结果记录为“用户选择”，不伪造聊天回复</li></ol></div>
+          <div><h3>操作确认卡片</h3><ol><li>用于提交、删除、覆盖或产生资源消耗的动作</li><li>展示最终参数、影响范围和可恢复性</li><li>用户明确授权后才允许继续执行</li></ol></div>
+        </div>
+        <div class="approval-flow" aria-label="人工确认流程">
+          <div class="approval-node"><b>思考与执行</b>完成可安全自动执行的步骤</div>
+          <div class="approval-node attention"><b>遇到确认点</b>暂停后续操作并保持过程展开</div>
+          <div class="approval-node attention"><b>独立确认卡片</b>展示动作、参数、影响与风险</div>
+          <div class="approval-node"><b>记录用户决定</b>确认、修改或取消均形成记录</div>
+          <div class="approval-node"><b>恢复或结束</b>继续执行、回退重做或输出结束结论</div>
+        </div>
+        <div class="approval-card">
+          <div class="approval-title"><b>确认提交作业</b><span>示例：确认组件独立于思考容器，并紧邻当前暂停位置</span></div>
+          <div class="approval-body"><div class="approval-data"><span>目标集群 <b>gpu-cluster</b></span><span>资源请求 <b>4 × A100</b></span><span>运行时限 <b>4 小时</b></span><span>预计消耗 <b>16 GPU·小时</b></span></div><div class="approval-warning">确认后将创建真实作业。作业可以取消，但已经产生的资源消耗无法撤回。</div></div>
+          <div class="approval-actions"><span class="action">取消任务</span><span class="action">返回修改</span><span class="action primary">确认提交</span></div>
+        </div>
+        <div class="branch-grid">
+          <div class="branch"><b>确认执行</b>写入确认时间和参数快照，思考过程恢复运行，继续执行后续工具调用。</div>
+          <div class="branch"><b>返回修改</b>回退到相关配置步骤，保留原确认记录；生成新方案后再次请求确认。</div>
+          <div class="branch"><b>取消任务</b>停止本轮执行，明确说明未执行内容、已产生的影响和最终状态。</div>
+        </div>
+        <div class="callout" style="margin-top:20px"><span>!</span><div><strong>确认卡片不能随过程自动收起</strong>成功完成后，确认卡片转为只读审计记录；等待确认或执行失败时，“思考中”保持展开。只有高风险、不可恢复或跨对象影响的操作才额外使用模态弹窗，对话中仍需保留确认记录。</div></div>
+      </section>
+
+      <section id="checklist">
+        <h2>7. 输出前检查清单</h2>
+        <p class="section-lead">用于产品验收、提示词设计和 Agent 输出自检。并非所有模块都必须很长，但信息责任必须闭环。</p>
+        <div class="checklist">
+          <div class="check"><i class="box"></i><span>“思考中”是否准确概括任务、缺口与计划，且没有机械复述用户原话？</span></div>
+          <div class="check"><i class="box"></i><span>需要推理的任务是否用“思考中”表达高层过程，并避免暴露私有原始思维链？</span></div>
+          <div class="check"><i class="box"></i><span>是否明确区分已知事实、假设和待确认信息？</span></div>
+          <div class="check"><i class="box"></i><span>执行前是否给出清晰方案和必要确认点？</span></div>
+          <div class="check"><i class="box"></i><span>高风险操作是否说明影响并获得用户确认？</span></div>
+          <div class="check"><i class="box"></i><span>执行过程是否只展示有决策价值的进度与证据？</span></div>
+          <div class="check"><i class="box"></i><span>工具、Subagent 与日志是否采用渐进披露？</span></div>
+          <div class="check"><i class="box"></i><span>外部事实和关键判断是否提供了就近的参考来源？</span></div>
+          <div class="check"><i class="box"></i><span>生成文件、脚本或报告时是否提供了清晰的产物入口？</span></div>
+          <div class="check"><i class="box"></i><span>结果首句是否直接回答“是否完成、结果是什么”？</span></div>
+          <div class="check"><i class="box"></i><span>失败时是否给出失败点、影响范围和恢复路径？</span></div>
+          <div class="check"><i class="box"></i><span>不确定结论是否标明依据和证据不足之处？</span></div>
+          <div class="check"><i class="box"></i><span>最后是否提供具体、有限且相关的下一步？</span></div>
+        </div>
+      </section>
+
+      <footer>本文件为独立规范展示页，不依赖 HPC Agent Demo 的组件、路由或构建流程。可直接在浏览器中打开或打印为 PDF。</footer>
+    </main>
+  </div>
+  <script>
+    const links = [...document.querySelectorAll('.toc a')];
+    const sections = links.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+    links.forEach(link => link.addEventListener('click', () => {
+      links.forEach(item => item.classList.toggle('active', item === link));
+    }));
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!visible) return;
+      links.forEach(link => link.classList.toggle('active', link.getAttribute('href') === '#' + visible.target.id));
+    }, { rootMargin: '-15% 0px -70% 0px', threshold: [0, .2, .6] });
+    sections.forEach(section => observer.observe(section));
+  </script>
+</body>
+</html>
