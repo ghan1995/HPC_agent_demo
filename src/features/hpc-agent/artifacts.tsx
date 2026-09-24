@@ -69,9 +69,9 @@ export function ArtifactCollection({ onOpen }: { onOpen: (id: ArtifactId) => voi
   );
 }
 
-export function ArtifactPanel({ onClose, onOpen }: { onClose: () => void; onOpen: (id: ArtifactId) => void }) {
+export function ArtifactPanel({ inspectorOpen, onClose, onOpen }: { inspectorOpen: boolean; onClose: () => void; onOpen: (id: ArtifactId) => void }) {
   return (
-    <aside className="artifact-panel" aria-label="产物面板">
+    <aside className={cn("artifact-panel", inspectorOpen && "artifact-panel--with-inspector")} aria-label="产物面板">
       <header className="artifact-panel__header">
         <div><h2>产物</h2><p>当前 Session · 3 个</p></div>
         <Button aria-label="关闭产物面板" onClick={onClose} size="icon-sm" variant="ghost"><X /></Button>

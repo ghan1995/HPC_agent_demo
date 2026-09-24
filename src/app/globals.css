@@ -1273,6 +1273,10 @@
   box-shadow: 0 18px 55px color-mix(in oklab, var(--foreground) 14%, transparent);
 }
 
+.artifact-panel--with-inspector {
+  right: calc(clamp(320px, 30vw, 380px) + 18px);
+}
+
 .artifact-panel__header { display: flex; align-items: flex-start; justify-content: space-between; padding: 18px 18px 12px; }
 .artifact-panel__header h2,
 .artifact-panel__header p { margin: 0; }
@@ -1487,6 +1491,10 @@
 .inspector-content td { padding: 10px; }
 
 @media (max-width: 1100px) {
+  .artifact-panel--with-inspector {
+    right: calc(min(380px, calc(100vw - 48px)) + 18px);
+  }
+
   .conversation-inspector {
     position: absolute;
     z-index: 30;

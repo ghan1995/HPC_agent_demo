@@ -9,6 +9,14 @@ import {
   ConfirmationRequest,
   ConfirmationTitle,
 } from "@/components/ai-elements/confirmation";
+import {
+  CodeBlock,
+  CodeBlockActions,
+  CodeBlockCopyButton,
+  CodeBlockFilename,
+  CodeBlockHeader,
+  CodeBlockTitle,
+} from "@/components/ai-elements/code-block";
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
 import { Message, MessageAction, MessageActions, MessageContent } from "@/components/ai-elements/message";
 import { Button } from "@/components/ui/button";
@@ -38,6 +46,16 @@ import { RunTrace } from "./run-trace";
 import { TaskDock } from "./task-dock";
 import type { ApprovalState, FeedbackValue, InspectorMode, TaskPlan } from "./types";
 import type { PromptInputMessage } from "@/components/ai-elements/prompt-input";
+
+const UPDATED_JOB_SCRIPT = `#!/bin/bash
+#SBATCH --job-name=simulation
+#SBATCH --partition=normal
+#SBATCH --nodes=1
+#SBATCH --mem=80G
+#SBATCH --time=02:00:00
+
+module load simulation/4.2
+srun ./run_simulation --input input.yaml`;
 
 function ContextStrip() {
   const items = [
@@ -198,6 +216,21 @@ export function ConversationView({
                     <dl><div><dt>失败原因</dt><dd>OUT_OF_MEMORY</dd></div><div><dt>申请内存</dt><dd>64 GB</dd></div><div><dt>峰值使用</dt><dd>71.6 GB</dd></div><div><dt>发生时间</dt><dd>10:31:48</dd></div></dl>
                   </section>
                   <p>建议将节点内存调整到 <strong>80 GB</strong> 后重新提交。当前脚本和输入文件可以继续复用；重新提交会创建一个新作业，需要你确认参数后执行。</p>
+                  <p>调整后的提交脚本如下：</p>
+                  <CodeBlock code={UPDATED_JOB_SCRIPT} language="bash">
+                    <CodeBlockHeader>
+                      <CodeBlockTitle>
+                        <CodeBlockFilename>Bash</CodeBlockFilename>
+                      </CodeBlockTitle>
+                      <CodeBlockActions>
+                        <CodeBlockCopyButton
+                          aria-label="复制代码"
+                          size="icon-sm"
+                          title="复制代码"
+                        />
+                      </CodeBlockActions>
+                    </CodeBlockHeader>
+                  </CodeBlock>
                 </div>
 
                 <ArtifactCollection onOpen={onInspectorChange} />
