@@ -92,7 +92,7 @@ export function SessionSidebar({
   return (
     <>
       <aside className="agent-sidebar" aria-label="Session 列表">
-        <header className="flex h-10 items-center justify-between px-1">
+        <header className="flex h-[52px] shrink-0 items-center justify-between px-1">
           <strong className="text-sm font-semibold tracking-tight">HPC Agent</strong>
           <div className="flex items-center gap-0.5">
             <Button aria-expanded={searchOpen} aria-label="搜索对话" onClick={() => setSearchOpen((value) => !value)} size="icon-sm" variant="ghost"><Search /></Button>

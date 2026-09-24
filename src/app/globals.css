@@ -149,7 +149,7 @@
   flex-direction: column;
   border-right: 1px solid var(--sidebar-border);
   background: var(--sidebar);
-  padding: 12px;
+  padding: 0 12px 12px;
 }
 
 .sidebar-backdrop {
