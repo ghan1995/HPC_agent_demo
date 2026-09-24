@@ -1,17 +1,8 @@
 "use client";
 
-import {
-  Artifact,
-  ArtifactAction,
-  ArtifactActions,
-  ArtifactContent,
-  ArtifactDescription,
-  ArtifactHeader,
-  ArtifactTitle,
-} from "@/components/ai-elements/artifact";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Copy, Download, FileText, PanelRightClose, PanelRightOpen } from "lucide-react";
+import { FileText, PanelRight, PanelRightClose, X } from "lucide-react";
 
 import type { InspectorMode } from "./types";
 
@@ -24,66 +15,62 @@ const titles: Record<Exclude<InspectorMode, null>, { title: string; description:
   log: { title: "运行日志", description: "仅展示可审计事件" },
 };
 
-const tabs: Array<{ id: Exclude<InspectorMode, null>; label: string }> = [
-  { id: "memory-trend", label: "内存趋势" },
-  { id: "run-comparison", label: "运行对比" },
-  { id: "diagnosis-report", label: "诊断报告" },
-  { id: "evidence", label: "证据" },
-  { id: "log", label: "运行日志" },
-];
+const tabLabels: Record<Exclude<InspectorMode, null>, string> = {
+  "memory-trend": "内存趋势",
+  "run-comparison": "运行对比",
+  "diagnosis-report": "诊断报告",
+  evidence: "证据",
+  comparison: "运行对比",
+  log: "运行日志",
+};
 
 export function Inspector({
-  collapsed,
   mode,
-  onCollapseChange,
+  onCloseTab,
+  onCollapse,
   onModeChange,
+  tabs,
 }: {
-  collapsed: boolean;
-  mode: Exclude<InspectorMode, null>;
-  onCollapseChange: (collapsed: boolean) => void;
+  mode: InspectorMode;
+  onCloseTab: (mode: Exclude<InspectorMode, null>) => void;
+  onCollapse: () => void;
   onModeChange: (mode: InspectorMode) => void;
+  tabs: Array<Exclude<InspectorMode, null>>;
 }) {
-  const title = titles[mode];
-
-  if (collapsed) {
-    return (
-      <Button className="inspector-restore" aria-label="展开右侧 Inspector" onClick={() => onCollapseChange(false)} size="icon" variant="outline">
-        <PanelRightOpen />
-      </Button>
-    );
-  }
-
   return (
-    <aside className="conversation-inspector" aria-label={title.title}>
-      <Artifact className="h-full rounded-none border-0 shadow-none">
-        <ArtifactHeader>
-          <div className="min-w-0">
-            <ArtifactTitle className="truncate">{title.title}</ArtifactTitle>
-            <ArtifactDescription className="truncate text-xs">{title.description}</ArtifactDescription>
-          </div>
-          <ArtifactActions>
-            <ArtifactAction icon={Copy} label="复制" tooltip="复制内容" />
-            {mode === "diagnosis-report" ? <ArtifactAction icon={Download} label="下载" tooltip="下载报告" /> : null}
-            <ArtifactAction icon={PanelRightClose} label="收起" onClick={() => onCollapseChange(true)} tooltip="收起 Inspector" />
-          </ArtifactActions>
-        </ArtifactHeader>
-        <nav className="inspector-tabs" aria-label="Inspector 内容页签">
+    <aside className="conversation-inspector" aria-label="右侧信息面板">
+      <div className="inspector-tabbar">
+        <nav className="inspector-tabs" aria-label="已打开的内容页签">
           {tabs.map((tab) => (
-            <button aria-selected={mode === tab.id} className={mode === tab.id ? "is-active" : undefined} key={tab.id} onClick={() => onModeChange(tab.id)} role="tab" type="button">
-              {tab.label}
-            </button>
+            <div className={mode === tab ? "inspector-tab is-active" : "inspector-tab"} key={tab}>
+              <button aria-selected={mode === tab} onClick={() => onModeChange(tab)} role="tab" type="button">{tabLabels[tab]}</button>
+              <button aria-label={`关闭${tabLabels[tab]}页签`} className="inspector-tab__close" onClick={() => onCloseTab(tab)} type="button"><X /></button>
+            </div>
           ))}
         </nav>
-        <ArtifactContent className="inspector-content">
+        <Button aria-label="收起右侧面板" className="inspector-collapse" onClick={onCollapse} size="icon-sm" variant="ghost"><PanelRightClose /></Button>
+      </div>
+      <div className="inspector-content">
+          {mode ? <div className="inspector-content__meta">{titles[mode].description}</div> : null}
           {mode === "diagnosis-report" ? <ReportContent /> : null}
           {mode === "memory-trend" ? <MemoryTrendContent /> : null}
           {mode === "run-comparison" ? <ComparisonContent /> : null}
           {mode === "evidence" ? <EvidenceContent /> : null}
           {mode === "comparison" ? <ComparisonContent /> : null}
           {mode === "log" ? <LogContent /> : null}
-        </ArtifactContent>
-      </Artifact>
+          {!mode ? <InspectorEmptyState /> : null}
+      </div>
     </aside>
+  );
+}
+
+function InspectorEmptyState() {
+  return (
+    <div className="inspector-empty">
+      <span><PanelRight /></span>
+      <strong>右侧面板</strong>
+      <p>从对话中打开产物、证据或运行日志，内容会以页签形式保留在这里。</p>
+    </div>
   );
 }
 

@@ -5,7 +5,9 @@ import {
   type PromptInputMessage,
   usePromptInputController,
 } from "@/components/ai-elements/prompt-input";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { PanelRightOpen } from "lucide-react";
+import { useCallback, useState } from "react";
 
 import { ConversationView } from "./conversation-view";
 import { ArtifactPanel } from "./artifacts";
@@ -15,11 +17,14 @@ import { initialSessionGroups } from "./data";
 import { SessionSidebar } from "./session-sidebar";
 import type { InspectorMode, SessionGroup } from "./types";
 
+type InspectorTab = Exclude<InspectorMode, null>;
+
 function AppContent() {
   const controller = usePromptInputController();
   const [view, setView] = useState<"home" | "history">("home");
   const [inspector, setInspector] = useState<InspectorMode>(null);
-  const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
+  const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [inspectorTabs, setInspectorTabs] = useState<InspectorTab[]>([]);
   const [artifactsOpen, setArtifactsOpen] = useState(false);
   const [submitted, setSubmitted] = useState("");
   const [groups, setGroups] = useState<SessionGroup[]>(initialSessionGroups);
@@ -37,6 +42,8 @@ function AppContent() {
     setSelectedId(id);
     setView("history");
     setInspector(null);
+    setInspectorOpen(false);
+    setInspectorTabs([]);
     setArtifactsOpen(false);
     setSubmitted("");
   }
@@ -71,7 +78,8 @@ function AppContent() {
     setView("home");
     setSelectedId(null);
     setInspector(null);
-    setInspectorCollapsed(false);
+    setInspectorOpen(false);
+    setInspectorTabs([]);
     setSubmitted("");
     controller.textInput.clear();
     controller.attachments.clear();
@@ -80,6 +88,22 @@ function AppContent() {
   function prepareSubmit() {
     controller.textInput.setInput("按 80 GB 调整内存，准备重新提交。");
     setLiveMessage("已将重新提交请求放入输入框");
+  }
+
+  const openInspectorContent = useCallback((mode: InspectorMode) => {
+    if (!mode) return;
+    setInspectorTabs((current) => current.includes(mode) ? current : [...current, mode]);
+    setInspector(mode);
+    setInspectorOpen(true);
+  }, []);
+
+  function closeInspectorTab(mode: InspectorTab) {
+    setInspectorTabs((current) => {
+      const index = current.indexOf(mode);
+      const next = current.filter((item) => item !== mode);
+      if (inspector === mode) setInspector(next[Math.min(index, next.length - 1)] ?? null);
+      return next;
+    });
   }
 
   return (
@@ -110,9 +134,10 @@ function AppContent() {
       ) : (
         <ConversationView
           inspector={inspector}
+          inspectorOpen={inspectorOpen}
           artifactsOpen={artifactsOpen}
           onArtifactsOpenChange={setArtifactsOpen}
-          onInspectorChange={(mode) => { setInspector(mode); if (mode) setInspectorCollapsed(false); }}
+          onInspectorChange={openInspectorContent}
           onPrepareSubmit={prepareSubmit}
           onSidebarToggle={() => setSidebarCollapsed(false)}
           onSubmit={handleSubmit}
@@ -120,13 +145,19 @@ function AppContent() {
           submitted={submitted}
         />
       )}
-      {view === "history" && artifactsOpen ? <ArtifactPanel onClose={() => setArtifactsOpen(false)} onOpen={(id) => { setInspector(id); setInspectorCollapsed(false); setArtifactsOpen(false); }} /> : null}
-      {inspector ? (
+      {view === "history" && artifactsOpen ? <ArtifactPanel onClose={() => setArtifactsOpen(false)} onOpen={(id) => { openInspectorContent(id); setArtifactsOpen(false); }} /> : null}
+      {!inspectorOpen ? (
+        <Button aria-label="展开右侧面板" className="inspector-edge-toggle" onClick={() => setInspectorOpen(true)} size="icon-sm" variant="ghost">
+          <PanelRightOpen />
+        </Button>
+      ) : null}
+      {inspectorOpen ? (
         <Inspector
-          collapsed={inspectorCollapsed}
           mode={inspector}
-          onCollapseChange={setInspectorCollapsed}
+          onCloseTab={closeInspectorTab}
+          onCollapse={() => setInspectorOpen(false)}
           onModeChange={setInspector}
+          tabs={inspectorTabs}
         />
       ) : null}
     </main>

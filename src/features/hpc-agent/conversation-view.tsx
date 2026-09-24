@@ -81,6 +81,7 @@ function planForApproval(state: ApprovalState): TaskPlan {
 
 export function ConversationView({
   inspector,
+  inspectorOpen,
   artifactsOpen,
   onArtifactsOpenChange,
   onInspectorChange,
@@ -91,6 +92,7 @@ export function ConversationView({
   submitted,
 }: {
   inspector: InspectorMode;
+  inspectorOpen: boolean;
   artifactsOpen: boolean;
   onArtifactsOpenChange: (open: boolean) => void;
   onInspectorChange: (mode: InspectorMode) => void;
@@ -175,7 +177,7 @@ export function ConversationView({
             <nav className="flex items-center gap-1" aria-label="对话工具">
               <Button aria-expanded={contextOpen} onClick={() => setContextOpen((value) => !value)} size="sm" variant="ghost"><Server data-icon="inline-start" />上下文<ChevronRight className={cn("transition-transform", contextOpen && "rotate-90")} data-icon="inline-end" /></Button>
               <Button aria-expanded={artifactsOpen} onClick={() => onArtifactsOpenChange(!artifactsOpen)} size="sm" variant="ghost"><PackageOpen data-icon="inline-start" />产物<span className="toolbar-count">3</span></Button>
-              <Button aria-pressed={inspector === "log"} onClick={() => onInspectorChange(inspector === "log" ? null : "log")} size="sm" variant="ghost"><ScrollText data-icon="inline-start" />运行日志</Button>
+              <Button aria-pressed={inspectorOpen && inspector === "log"} onClick={() => onInspectorChange("log")} size="sm" variant="ghost"><ScrollText data-icon="inline-start" />运行日志</Button>
             </nav>
           </div>
           {contextOpen ? <div className="conversation-context"><ContextStrip /></div> : null}
