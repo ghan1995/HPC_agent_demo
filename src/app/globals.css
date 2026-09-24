@@ -1334,68 +1334,80 @@
   background: var(--background);
 }
 
+.inspector-root {
+  min-height: 0;
+  flex: 1 1 auto;
+  gap: 0;
+}
+
 .inspector-tabbar {
   display: flex;
   min-height: 52px;
   flex: 0 0 52px;
   align-items: center;
-  border-bottom: 1px solid var(--border);
   background: color-mix(in oklab, var(--background) 94%, transparent);
 }
 
 .inspector-tabs {
   display: flex;
+  width: auto;
+  height: auto;
   min-width: 0;
   flex: 1 1 auto;
-  align-self: stretch;
-  align-items: end;
-  gap: 2px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
   overflow-x: auto;
-  padding: 7px 4px 0 8px;
+  border-radius: 0;
+  background: transparent;
+  padding: 0 4px 0 12px;
   scrollbar-width: none;
 }
 
 .inspector-tabs::-webkit-scrollbar { display: none; }
 .inspector-tab {
   display: flex;
-  height: 38px;
+  height: 32px;
   flex: 0 0 auto;
   align-items: center;
-  border: 0;
-  border-radius: 9px 9px 0 0;
-  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--background);
   color: var(--muted-foreground);
+  overflow: hidden;
 }
-.inspector-tab > button:first-child {
+.inspector-tab > [data-slot="tabs-trigger"] {
   height: 100%;
   border: 0;
+  border-radius: 0;
   background: transparent;
-  padding: 0 4px 0 10px;
+  padding: 0 6px 0 10px;
   color: inherit;
   font-size: 11px;
-  cursor: pointer;
+  font-weight: 500;
+  box-shadow: none;
 }
 .inspector-tab:hover { color: var(--foreground); }
-.inspector-tab.is-active {
-  border: 1px solid var(--border);
-  border-bottom-color: var(--background);
-  background: var(--background);
+.inspector-tab:has([data-slot="tabs-trigger"][data-active]) {
+  border-color: var(--foreground);
+  background: var(--muted);
   color: var(--foreground);
-  font-weight: 600;
 }
+.inspector-tab > [data-slot="tabs-trigger"][data-active] { background: transparent; font-weight: 600; }
 .inspector-tab__close {
   display: flex;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 100%;
   align-items: center;
   justify-content: center;
   border: 0;
-  border-radius: 6px;
+  border-left: 1px solid transparent;
+  border-radius: 0;
   background: transparent;
   color: var(--muted-foreground);
   cursor: pointer;
 }
-.inspector-tab__close:hover { background: var(--muted); color: var(--foreground); }
+.inspector-tab__close:hover { border-left-color: var(--border); background: var(--accent); color: var(--foreground); }
 .inspector-tab__close svg { width: 12px; height: 12px; }
 .inspector-collapse { margin: 0 12px 0 6px; }
 

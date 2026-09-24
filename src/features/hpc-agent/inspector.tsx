@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, PanelRight, PanelRightClose, X } from "lucide-react";
 
 import type { InspectorMode } from "./types";
@@ -39,28 +40,40 @@ export function Inspector({
 }) {
   return (
     <aside className="conversation-inspector" aria-label="右侧信息面板">
-      <div className="inspector-tabbar">
-        <nav className="inspector-tabs" aria-label="已打开的内容页签">
-          {tabs.map((tab) => (
-            <div className={mode === tab ? "inspector-tab is-active" : "inspector-tab"} key={tab}>
-              <button aria-selected={mode === tab} onClick={() => onModeChange(tab)} role="tab" type="button">{tabLabels[tab]}</button>
-              <button aria-label={`关闭${tabLabels[tab]}页签`} className="inspector-tab__close" onClick={() => onCloseTab(tab)} type="button"><X /></button>
-            </div>
-          ))}
-        </nav>
-        <Button aria-label="收起右侧面板" className="inspector-collapse" onClick={onCollapse} size="icon-sm" variant="ghost"><PanelRightClose /></Button>
-      </div>
-      <div className="inspector-content">
-          {mode ? <div className="inspector-content__meta">{titles[mode].description}</div> : null}
-          {mode === "diagnosis-report" ? <ReportContent /> : null}
-          {mode === "memory-trend" ? <MemoryTrendContent /> : null}
-          {mode === "run-comparison" ? <ComparisonContent /> : null}
-          {mode === "evidence" ? <EvidenceContent /> : null}
-          {mode === "comparison" ? <ComparisonContent /> : null}
-          {mode === "log" ? <LogContent /> : null}
-          {!mode ? <InspectorEmptyState /> : null}
-      </div>
+      <Tabs className="inspector-root" onValueChange={(value) => onModeChange(value as Exclude<InspectorMode, null>)} value={mode}>
+        <div className="inspector-tabbar">
+          <TabsList aria-label="已打开的内容页签" className="inspector-tabs">
+            {tabs.map((tab) => (
+              <div className="inspector-tab" key={tab}>
+                <TabsTrigger value={tab}>{tabLabels[tab]}</TabsTrigger>
+                <button aria-label={`关闭${tabLabels[tab]}页签`} className="inspector-tab__close" onClick={() => onCloseTab(tab)} type="button"><X /></button>
+              </div>
+            ))}
+          </TabsList>
+          <Button aria-label="收起右侧面板" className="inspector-collapse" onClick={onCollapse} size="icon-sm" variant="ghost"><PanelRightClose /></Button>
+        </div>
+        {tabs.map((tab) => (
+          <TabsContent className="inspector-content" key={tab} value={tab}>
+            <InspectorContent mode={tab} />
+          </TabsContent>
+        ))}
+        {tabs.length === 0 ? <div className="inspector-content"><InspectorEmptyState /></div> : null}
+      </Tabs>
     </aside>
+  );
+}
+
+function InspectorContent({ mode }: { mode: Exclude<InspectorMode, null> }) {
+  return (
+    <>
+      <div className="inspector-content__meta">{titles[mode].description}</div>
+      {mode === "diagnosis-report" ? <ReportContent /> : null}
+      {mode === "memory-trend" ? <MemoryTrendContent /> : null}
+      {mode === "run-comparison" ? <ComparisonContent /> : null}
+      {mode === "evidence" ? <EvidenceContent /> : null}
+      {mode === "comparison" ? <ComparisonContent /> : null}
+      {mode === "log" ? <LogContent /> : null}
+    </>
   );
 }
 
