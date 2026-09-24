@@ -145,7 +145,7 @@ function AppContent() {
           submitted={submitted}
         />
       )}
-      {view === "history" && artifactsOpen ? <ArtifactPanel onClose={() => setArtifactsOpen(false)} onOpen={(id) => { openInspectorContent(id); setArtifactsOpen(false); }} /> : null}
+      {view === "history" && artifactsOpen ? <ArtifactPanel inspectorOpen={inspectorOpen} onClose={() => setArtifactsOpen(false)} onOpen={(id) => { openInspectorContent(id); setArtifactsOpen(false); }} /> : null}
       {!inspectorOpen ? (
         <Button aria-label="展开右侧面板" className="inspector-edge-toggle" onClick={() => setInspectorOpen(true)} size="icon-sm" variant="ghost">
           <PanelRightOpen />
