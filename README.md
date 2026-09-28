@@ -27,6 +27,8 @@ python3 -m http.server 4173 -d out
 
 ## 文档入口
 
+- **[直接打开输入框与 Task 面板交互文档](https://ghan1995.github.io/HPC_agent_demo/docs/composer-task-interaction-spec.html)**
+- [输入框与 Task 面板交互文档（仓库文件）](docs/composer-task-interaction-spec.html)
 - **[直接打开 Agent 对话流输出规范](https://ghan1995.github.io/HPC_agent_demo/docs/agent-conversation-output-spec.html)**
 - [Agent 对话流输出规范（仓库文件）](docs/agent-conversation-output-spec.html)
 - [下一步设计待办](docs/next-design-todos.md)

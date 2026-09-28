@@ -5,6 +5,9 @@ project_dir="$(cd "$(dirname "$0")/.." && pwd)"
 build_dir="$project_dir/dist"
 
 rm -rf "$build_dir"
-mkdir -p "$build_dir/server" "$build_dir/client"
+mkdir -p "$build_dir/server" "$build_dir/client/docs" "$build_dir/.openai"
 cp -R "$project_dir/out"/. "$build_dir/client"/
+cp "$project_dir/docs/agent-conversation-output-spec.html" "$build_dir/client/docs/"
+cp "$project_dir/docs/composer-task-interaction-spec.html" "$build_dir/client/docs/"
+cp "$project_dir/.openai/hosting.json" "$build_dir/.openai/hosting.json"
 cp "$project_dir/scripts/sites-static-worker.js" "$build_dir/server/index.js"
